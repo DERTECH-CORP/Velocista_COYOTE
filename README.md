@@ -1,5 +1,8 @@
 # Velocista "Coyote" - Robot Seguidor de Línea
 
+![image](https://github.com/DERTECH-CORP/Velocista_COYOTE/assets/105568570/76c6f645-f40d-4228-9e7b-d641e8871e65)
+
+
 ## Descripción
 
 El velocista "Coyote" es un robot seguidor de línea de alto rendimiento diseñado para competir en desafíos de velocidad y precisión. Este repositorio contiene el firmware, el diseño de hardware electrónico y los modelos 3D relacionados con el robot Coyote. Aquí encontrarás toda la información necesaria para comprender el robot seguidor de línea Coyote.
