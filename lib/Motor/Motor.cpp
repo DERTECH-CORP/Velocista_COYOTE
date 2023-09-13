@@ -12,7 +12,8 @@ MOTOR::MOTOR(int dir, int pwm, int chanel){
 
     ledcSetup(this->chanel, this->frequency, this->resolution);
 
-    pinMode(this->dir, OUTPUT);
+    pinMode(this->dir, OUTPUT); 
+    
     // pinMode(this->pwm,OUTPUT);
 
     ledcAttachPin(this->pwm, this->chanel);
