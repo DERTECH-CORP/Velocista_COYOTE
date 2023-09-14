@@ -1,4 +1,14 @@
 #include "BluetoothSerial.h"
+#include <QTRSensors.h>
+
+#define sensor1 = 13
+#define sensor2 = 27
+#define sensor3 = 26
+#define sensor4 = 25
+#define sensor5 = 33
+#define sensor6 = 32
+#define sensor7 = 35
+#define sensor8 = 34
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
@@ -26,4 +36,6 @@ void loop() {
       Serial.println("Apagar Led");
     }
   }
+
+
 }
