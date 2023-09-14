@@ -10,7 +10,6 @@
 // #define sensor7 = 35
 // #define sensor8 = 34
 
-int LED_BUILTIN = 4;
 
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
@@ -29,17 +28,17 @@ void calibration()
 {
     qtr.setTypeAnalog();
     qtr.setSensorPins((const uint8_t[]){
-      13, 27, 26, 25, 33, 32, 35, 34
+      13, 27, 25, 26, 33, 32, 35, 34
       }, SensorCount);
 
     delay(500);
-    pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, HIGH);
+    pinMode(Led, OUTPUT);
+    digitalWrite(Led, HIGH);
     for (uint16_t i = 0; i < 1000; i++)
     {
         qtr.calibrate();
     }
-    digitalWrite(LED_BUILTIN, LOW); //
+    digitalWrite(Led, LOW); //
 
     // print the calibration minimum values measured when emitters were on
 }
@@ -53,9 +52,11 @@ void getPosition(){
     for (uint8_t i = 0; i < SensorCount; i++)
       {
         SerialBT.print(sensorValues[i]);
-        SerialBT.print('\t');
+        SerialBT.print(" || ");
       }
-      Serial.println(position);
+      SerialBT.println(position);
+      SerialBT.print('\n');
+
     
      delay(250);
 }
