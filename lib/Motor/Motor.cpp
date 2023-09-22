@@ -23,7 +23,7 @@ MOTOR::MOTOR(int dirRight, int dirLeft, int chanelRight, int chanelLeft){
 
 void MOTOR::GoAvance(int speed){
 
-    ledcWrite(this->chanelLeft, LOW);
+    ledcWrite(this->chanelLeft, 0);
     ledcWrite(this->chanelRight, speed);
 }
 
