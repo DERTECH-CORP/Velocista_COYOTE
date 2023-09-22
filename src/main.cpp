@@ -73,7 +73,7 @@ void calibration()
   {
     qtr.calibrate();
   }
-  digitalWrite(Led, LOW); 
+  digitalWrite(Led, LOW);
 }
 
 int getPosition()
@@ -97,6 +97,73 @@ void printPositionAndSensors()
   delay(250);
 }
 
+void setKp()
+{
+  SerialBT.println("Ingrese la el valor para Kp");
+  float newKp = SerialBT.read();
+  delay(3000);
+  kp = newKp;
+  SerialBT.print("El nuevo valor es: ");
+  SerialBT.println(kp);
+  SerialBT.println("Sali");
+}
+
+void printOptions()
+{
+  SerialBT.println("- M Mostrar el menu");
+  SerialBT.println("- A Encender motores");
+  SerialBT.println("- B Apagar motores");
+
+  SerialBT.println("- C Kp + 0.1");
+  SerialBT.print(" kp = ");
+  SerialBT.println(kp);
+
+  SerialBT.println("- C Kp + 0.1");
+  SerialBT.print(" kp = ");
+  SerialBT.println(kp);
+
+  SerialBT.println("- D Kp + 0.01");
+  SerialBT.print(" kp = ");
+  SerialBT.println(kp);
+}
+
+void menuBT()
+{
+  if (SerialBT.available())
+  {
+    char Menssage = SerialBT.read();
+    switch (Menssage)
+    {
+    case 'M':
+    {
+      printOptions();
+      break;
+    }
+    case 'A':
+    {
+      motorLeft->GoAvance(50);
+      motorRight->GoAvance(50);
+      break;
+    }
+    case 'B':
+    {
+      motorLeft->Still();
+      motorRight->Still();
+      break;
+    }
+    case 'D':
+    {
+      kp += 0.1;
+      SerialBT.println(kp);
+      break;
+    }
+
+    default:
+      break;
+    }
+  }
+}
+
 void setup()
 {
   Serial.begin(9600);
@@ -109,21 +176,7 @@ void setup()
 
 void loop()
 {
-
-  if (SerialBT.available())
-  {
-    char Mensaje = SerialBT.read();
-    if (Mensaje == 'A')
-    {
-      motorLeft->GoAvance(50);
-      motorRight->GoAvance(50);
-    }
-    else if (Mensaje == 'B')
-    {
-      motorLeft->Still();
-      motorRight->Still();
-    }
-  }
+  menuBT();
 
   // int position = getPosition();
 
