@@ -1,142 +1,109 @@
-#include "BluetoothSerial.h"
-#include <QTRSensors.h>
+#include <Arduino.h>
 
-// #define sensor1 = 13
-// #define sensor2 = 27
-// #define sensor3 = 26
-// #define sensor4 = 25
-// #define sensor5 = 33
-// #define sensor6 = 32
-// #define sensor7 = 35
-// #define sensor8 = 34
+#define LED_1 4
+#define LED_2 5
+#define LED_3 2
+#define BUZZER 18
 
-#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
-#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
-#endif
-
-int proportional = 0;
-int derivative = 0;
-int integral = 0;
-int lastErr = 0;
-
-float kp = 0;
-float ki = 0;
-float kd = 0;
-
-float speed = 0;
-
-int velocity = 100;
-
-float pidLeft = 0;
-float pidRight = 0;
-
-int maxSpeed = 170;
-int minSpeed = 30;
-
-
-BluetoothSerial SerialBT;
-
-QTRSensors qtr;
-
-int setpoint = 3400;
-
-const uint8_t SensorCount = 8;
-uint16_t sensorValues[SensorCount];
-
-int Led = 5;
-
-void calibration()
+#define M1A 19
+#define M1B 21
+#define M2A 23
+#define M2B 22
+#define DER_VELOCIDAD 12
+#define IZQ_VELOCIDAD 14
+#define DER_DIRECCION 13
+#define IZQ_DIRECCION 15
+#define left 1
+#define right 0
+#define backward 0
+#define Forward 255
+const int PWMFreq = 1000; /* 1 KHz */
+const int PWMResolution = 8;
+const int PWMSpeedChannel = 4;
+void setUpPinModes()
 {
-  qtr.setTypeAnalog();
-  qtr.setSensorPins((const uint8_t[]){
-                        13, 27, 25, 26, 33, 32, 35, 34},
-                    SensorCount);
+  ledcSetup(IZQ_DIRECCION, 1000, 8);
+  ledcSetup(IZQ_VELOCIDAD, 1000, 8);
+  ledcSetup(DER_DIRECCION, 1000, 8);
+  ledcSetup(DER_VELOCIDAD, 1000, 8);
 
-  delay(500);
-  pinMode(Led, OUTPUT);
-  digitalWrite(Led, HIGH);
-  for (uint16_t i = 0; i < 1000; i++)
-  {
-    qtr.calibrate();
-  }
-  digitalWrite(Led, LOW); //
-
-  // print the calibration minimum values measured when emitters were on
+  ledcAttachPin(M1A, IZQ_DIRECCION);
+  ledcAttachPin(M1B, IZQ_VELOCIDAD);
+  ledcAttachPin(M2A, DER_DIRECCION);
+  ledcAttachPin(M2B, DER_VELOCIDAD);
 }
 
-int getPosition()
-{
-  int position = qtr.readLineWhite(sensorValues);
-  return position;
-}
-
-void printPositionAndSensors()
-{
-  int position = qtr.readLineWhite(sensorValues);
-
-  // print the sensor values as numbers from 0 to 1000, where 0 means maximum
-  // reflectance and 1000 means minimum reflectance, followed by the line
-  // position
-
-  for (uint8_t i = 0; i < SensorCount; i++)
-  {
-    SerialBT.print(sensorValues[i]);
-    SerialBT.print(" || ");
-  }
-  SerialBT.println(position);
-  SerialBT.print('\n');
-
-  delay(250);
-}
-
-void setup()
-{
-  Serial.begin(9600);
-  SerialBT.begin("ESP32test");
-  pinMode(Led, OUTPUT);
-  calibration();
-}
-
-void loop()
-{
-  if (SerialBT.available())
-  {
-    char Mensaje = SerialBT.read();
-    if (Mensaje == 'A')
-    {
-      digitalWrite(Led, HIGH);
-      Serial.println("Encender Led");
+void motor(int motor, int direccion, int velocidad) { 
+  if (motor == left) {
+    if (direccion == 0) {
+      ledcWrite(IZQ_DIRECCION, velocidad);
+      ledcWrite(IZQ_VELOCIDAD, 0);
     }
-    else if (Mensaje == 'B')
-    {
-      digitalWrite(Led, LOW);
-      Serial.println("Apagar Led");
+    else {
+      ledcWrite(IZQ_DIRECCION, 0);
+      ledcWrite(IZQ_VELOCIDAD, velocidad);
+    }
+    // return ;
+  }
+  else if (motor == right) {
+    if (direccion == 0) {
+      ledcWrite(DER_DIRECCION, 0);
+      ledcWrite(DER_VELOCIDAD, velocidad);
+
+    }
+    else {
+      ledcWrite(DER_DIRECCION, velocidad);
+      ledcWrite(DER_VELOCIDAD, 0);
     }
   }
+}
 
-  int position = getPosition();
+void setup() {
+  pinMode(LED_1, OUTPUT);
+  pinMode(LED_2, OUTPUT);
+  pinMode(LED_3, OUTPUT);
+  pinMode(BUZZER, OUTPUT);
+  setUpPinModes();
+  motor(left, Forward, 0);
+  motor(right, Forward, 0);
+}
 
-  proportional = position - setpoint;
 
-  derivative = proportional - lastErr;
 
-  integral = integral + proportional;
-
-  speed = (proportional * kp) + (derivative * kd) + (integral * ki);
-
-  lastErr = proportional;
-
-  pidLeft = (velocity + speed);
-  pidRight = (velocity - speed);
-
-  if (pidLeft > maxSpeed) pidLeft = maxSpeed;
-  else if (pidLeft < minSpeed) pidLeft = minSpeed;
-
-  if (pidRight < minSpeed) pidRight = minSpeed;
-  else if (pidRight > maxSpeed) pidRight = maxSpeed;
-
-  SerialBT.println('motor left');
-  SerialBT.println(pidLeft);
-  SerialBT.println('motor right');
-  SerialBT.println(pidRight);
+void loop() {
+  digitalWrite(LED_1, HIGH);
+  delay(1000);
+  digitalWrite(LED_1, LOW);
+  delay(1000);
+  digitalWrite(LED_2, HIGH);
+  delay(1000);
+  digitalWrite(LED_2, LOW);
+  delay(1000);
+  digitalWrite(LED_3, HIGH);
+  delay(1000);
+  digitalWrite(LED_3, LOW);
+  delay(1000);
+  digitalWrite(LED_1, HIGH);
+  digitalWrite(LED_2, HIGH);
+  digitalWrite(LED_3, HIGH);
+  delay(1000);
+  digitalWrite(LED_1, LOW);
+  digitalWrite(LED_2, LOW);
+  digitalWrite(LED_3, LOW);
+  delay(1000);
+  digitalWrite(BUZZER, HIGH);
+  delay(1000);
+  digitalWrite(BUZZER, LOW);
+  delay(1000);
+  motor(left, Forward, 50);
+  motor(right, Forward, 50);
+  delay(3000);
+  motor(right, Forward, 0);
+  motor(left, backward, 0);
+  delay(3000);
+  motor(right, backward, 40);
+  motor(left, backward, 40);
+  delay(3000);
+  motor(right, Forward, 0);
+  motor(left, backward, 0);
 }
