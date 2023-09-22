@@ -4,10 +4,10 @@
 class MOTOR
 {
 private:
-    int dir, pwm, resolution, frequency, chanel;
+    int dirRight, dirLeft, resolution, frequency, chanelRight, chanelLeft;
 
 public:
-    MOTOR(int dir, int pwm, int chanel);
+    MOTOR(int dirRight, int dirLeft, int chanelRight, int chanelLeft);
 
     void GoAvance(int speed);
 

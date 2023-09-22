@@ -2,36 +2,39 @@
 #include <QTRSensors.h>
 #include <Arduino.h>
 
-MOTOR::MOTOR(int dir, int pwm, int chanel){
-    this->dir = dir;
-    this->pwm = pwm;
-    this->chanel = chanel;
+MOTOR::MOTOR(int dirRight, int dirLeft, int chanelRight, int chanelLeft){
+    this->dirRight = dirRight;
+    this->dirLeft = dirLeft;
+    this->chanelRight = chanelRight;
+    this->chanelLeft = chanelLeft;
 
-    this->frequency = 5000;
+
+    //frecuencia recomendada 1k = 1kz 
+    this->frequency = 1000;
     this->resolution = 8;
 
-    ledcSetup(this->chanel, this->frequency, this->resolution);
+    ledcSetup(this->chanelRight, this->frequency, this->resolution);
+    ledcSetup(this->chanelLeft, this->frequency, this->resolution);
 
-    pinMode(this->dir, OUTPUT); 
-    
-    // pinMode(this->pwm,OUTPUT);
 
-    ledcAttachPin(this->pwm, this->chanel);
+    ledcAttachPin(this->dirRight, this->chanelRight); 
+    ledcAttachPin(this->dirLeft, this->chanelLeft);
 }
 
 void MOTOR::GoAvance(int speed){
 
-    digitalWrite(dir, LOW);
-    ledcWrite(this->pwm, speed);
+    ledcWrite(this->chanelLeft, LOW);
+    ledcWrite(this->chanelRight, speed);
 }
 
 void MOTOR::GoBack(int speed){
 
-    digitalWrite(dir, HIGH);
-    ledcWrite(this->pwm, speed);
+    ledcWrite(this->chanelLeft, speed);
+    ledcWrite(this->chanelRight, LOW);
 
 }
 
 void MOTOR::Still(){
-    ledcWrite(this->pwm, 0);
+    ledcWrite(this->chanelLeft, LOW);
+    ledcWrite(this->chanelRight, LOW);
 }
