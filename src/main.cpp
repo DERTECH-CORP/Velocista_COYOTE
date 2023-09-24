@@ -108,23 +108,41 @@ void setKp()
   SerialBT.println("Sali");
 }
 
-void printOptions()
+void printMainMenu()
 {
   SerialBT.println("- M Mostrar el menu");
   SerialBT.println("- A Encender motores");
   SerialBT.println("- B Apagar motores");
+  SerialBT.println("- D Menu de configuracion del PID");
+}
 
-  SerialBT.println("- C Kp + 0.1");
-  SerialBT.print(" kp = ");
+void printOptions()
+{
+  // clean the serial
+  for (int i = 0; i < 10; i++)
+  {
+    SerialBT.println("");
+  }
+
+  SerialBT.println("Configuracion Actual:");
+
+  SerialBT.print("- KP = ");
   SerialBT.println(kp);
 
-  SerialBT.println("- C Kp + 0.1");
-  SerialBT.print(" kp = ");
-  SerialBT.println(kp);
+  SerialBT.print("- KI = ");
+  SerialBT.println(ki);
 
-  SerialBT.println("- D Kp + 0.01");
-  SerialBT.print(" kp = ");
-  SerialBT.println(kp);
+  SerialBT.print("- KD = ");
+  SerialBT.println(kd);
+
+  SerialBT.println(" (K) KP + 0.1 / (L) KP - 0.1");
+  SerialBT.println(" (Q) KP + 0.01 / (W) KP - 0.01");
+
+  SerialBT.println(" (R) KI + 0.1 / (T) KI - 0.1");
+  SerialBT.println(" (U) KI + 0.01 / (I) KI - 00.1");
+
+  SerialBT.println(" (Z) KD + 0.1 / (X) KD - 0.1");
+  SerialBT.println(" (G) KD + 0.01 / (H) KD - 00.1");
 }
 
 void menuBT()
@@ -151,10 +169,78 @@ void menuBT()
       motorRight->Still();
       break;
     }
-    case 'D':
+    case 'K':
     {
       kp += 0.1;
-      SerialBT.println(kp);
+      printOptions();
+      break;
+    }
+    case 'L':
+    {
+      kp -= 0.1;
+      printOptions();
+      break;
+    }
+    case 'Q':
+    {
+      kp += 0.01;
+      printOptions();
+      break;
+    }
+    case 'W':
+    {
+      kp -= 0.01;
+      printOptions();
+      break;
+    }
+
+    case 'R':
+    {
+      ki += 0.1;
+      printOptions();
+      break;
+    }
+    case 'T':
+    {
+      ki -= 0.1;
+      printOptions();
+      break;
+    }
+    case 'U':
+    {
+      ki += 0.01;
+      printOptions();
+      break;
+    }
+    case 'I':
+    {
+      ki -= 0.01;
+      printOptions();
+      break;
+    }
+
+    case 'Z':
+    {
+      kd += 0.1;
+      printOptions();
+      break;
+    }
+    case 'X':
+    {
+      kd -= 0.1;
+      printOptions();
+      break;
+    }
+    case 'G':
+    {
+      kd += 0.01;
+      printOptions();
+      break;
+    }
+    case 'H':
+    {
+      kd -= 0.01;
+      printOptions();
       break;
     }
 
