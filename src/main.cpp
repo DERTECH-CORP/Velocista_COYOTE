@@ -15,6 +15,8 @@
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 
+bool run = false ;
+
 #define M1A 19
 #define M1B 21
 #define M2A 23
@@ -29,19 +31,19 @@ int derivative = 0;
 int integral = 0;
 int lastErr = 0;
 
-float kp = 0;
+float kp = 0.53;
 float ki = 0;
 float kd = 0;
 
 float speed = 0;
 
-int velocity = 100;
+int velocity = 70;
 
 float pidLeft = 0;
 float pidRight = 0;
 
-int maxSpeed = 170;
-int minSpeed = 30;
+int maxSpeed = velocity ;
+int minSpeed = 0;
 
 BluetoothSerial SerialBT;
 
@@ -51,7 +53,7 @@ MOTOR *motorLeft = new MOTOR(M1B, M1A, M1B_CHANEL, M1A_CHANEL);
 
 MOTOR *motorRight = new MOTOR(M2A, M2B, M2B_CHANEL, M2A_CHANEL);
 
-int setpoint = 3400;
+int setpoint = 3500;
 
 const uint8_t SensorCount = 8;
 uint16_t sensorValues[SensorCount];
@@ -69,7 +71,7 @@ void calibration()
   delay(500);
   pinMode(Led, OUTPUT);
   digitalWrite(Led, HIGH);
-  for (uint16_t i = 0; i < 1000; i++)
+  for (uint16_t i = 0; i < 500; i++)
   {
     qtr.calibrate();
   }
@@ -78,13 +80,13 @@ void calibration()
 
 int getPosition()
 {
-  int position = qtr.readLineWhite(sensorValues);
+  int position = qtr.readLineBlack(sensorValues);
   return position;
 }
 
 void printPositionAndSensors()
 {
-  int position = qtr.readLineWhite(sensorValues);
+  int position = qtr.readLineBlack(sensorValues);
 
   for (uint8_t i = 0; i < SensorCount; i++)
   {
@@ -116,6 +118,44 @@ void printMainMenu()
   SerialBT.println("- D Menu de configuracion del PID");
 }
 
+void PID()
+{
+  int position = getPosition();
+
+  proportional = position - setpoint;
+
+  derivative = proportional - lastErr;
+
+  integral = integral + proportional;
+
+  speed = (proportional * kp) + (derivative * kd) + (integral * ki);
+
+  lastErr = proportional;
+
+  pidLeft = (velocity + speed + 5);
+  pidRight = (velocity - speed);
+
+  if (pidLeft > maxSpeed + 5)
+    pidLeft = maxSpeed + 5;
+  else if (pidLeft < minSpeed)
+    pidLeft = minSpeed;
+
+  if (pidRight < minSpeed)
+    pidRight = minSpeed;
+  else if (pidRight > maxSpeed)
+    pidRight = maxSpeed;
+
+  motorLeft->GoAvance(pidLeft);
+  motorRight->GoAvance(pidRight);
+
+  SerialBT.println(pidLeft);
+  SerialBT.println(pidRight);
+}
+
+int velL = 60;
+int velR = 65;
+
+
 void printOptions()
 {
   // clean the serial
@@ -135,6 +175,12 @@ void printOptions()
   SerialBT.print("- KD = ");
   SerialBT.println(kd);
 
+  SerialBT.print("- velL = ");
+  SerialBT.println(velL);
+
+  SerialBT.print("- velR = ");
+  SerialBT.println(velR);
+
   SerialBT.println(" (K) KP + 0.1 / (L) KP - 0.1");
   SerialBT.println(" (Q) KP + 0.01 / (W) KP - 0.01");
 
@@ -143,7 +189,11 @@ void printOptions()
 
   SerialBT.println(" (Z) KD + 0.1 / (X) KD - 0.1");
   SerialBT.println(" (G) KD + 0.01 / (H) KD - 00.1");
+
+  SerialBT.println(" (1) velL + 1 / (2) velL - 1");
+  SerialBT.println(" (3) velR + 1 / (4) velR - 1");
 }
+
 
 void menuBT()
 {
@@ -159,14 +209,12 @@ void menuBT()
     }
     case 'A':
     {
-      motorLeft->GoAvance(50);
-      motorRight->GoAvance(50);
+      run = true ;
       break;
     }
     case 'B':
     {
-      motorLeft->Still();
-      motorRight->Still();
+      run = false;
       break;
     }
     case 'K':
@@ -243,6 +291,35 @@ void menuBT()
       printOptions();
       break;
     }
+    case 'F':
+    {
+      SerialBT.println(getPosition());
+      break;
+    }
+    case '1':
+    {
+      velL++;
+      printOptions();
+      break;
+    }
+    case '2':
+    {
+      velL--;
+      printOptions();
+      break;
+    }
+    case '3':
+    {
+      velR++;
+      printOptions();
+      break;
+    }
+    case '4':
+    {
+      velR--;
+      printOptions();
+      break;
+    }
 
     default:
       break;
@@ -255,38 +332,33 @@ void setup()
   Serial.begin(9600);
   SerialBT.begin("ESP32test");
   pinMode(Led, OUTPUT);
-  // calibration();
+  calibration();
   pinMode(LedB, OUTPUT);
+  delay(2000);
   digitalWrite(LedB, HIGH);
 }
 
 void loop()
 {
+  // motorLeft->GoAvance(velL);
+
+  // motorRight->GoAvance(velR);
   menuBT();
 
-  // int position = getPosition();
-
-  // proportional = position - setpoint;
-
-  // derivative = proportional - lastErr;
-
-  // integral = integral + proportional;
-
-  // speed = (proportional * kp) + (derivative * kd) + (integral * ki);
-
-  // lastErr = proportional;
-
-  // pidLeft = (velocity + speed);
-  // pidRight = (velocity - speed);
-
-  // if (pidLeft > maxSpeed) pidLeft = maxSpeed;
-  // else if (pidLeft < minSpeed) pidLeft = minSpeed;
-
-  // if (pidRight < minSpeed) pidRight = minSpeed;
-  // else if (pidRight > maxSpeed) pidRight = maxSpeed;
+  if (run)
+  {
+    PID();
+  }
+  else
+  {
+    motorLeft->Still();
+    motorRight->Still();
+  }
 
   // SerialBT.println('motor left');
   // SerialBT.println(pidLeft);
   // SerialBT.println('motor right');
   // SerialBT.println(pidRight);
+
+  // motorLeft->GoAvance(50);
 }
