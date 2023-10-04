@@ -15,7 +15,7 @@
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 
-bool run = false ;
+bool run = false;
 
 #define M1A 19
 #define M1B 21
@@ -37,12 +37,12 @@ float kd = 0;
 
 float speed = 0;
 
-int velocity = 70;
+int velocity = 80;
 
 float pidLeft = 0;
 float pidRight = 0;
 
-int maxSpeed = velocity ;
+int maxSpeed = 200;
 int minSpeed = 0;
 
 BluetoothSerial SerialBT;
@@ -148,13 +148,12 @@ void PID()
   motorLeft->GoAvance(pidLeft);
   motorRight->GoAvance(pidRight);
 
-  SerialBT.println(pidLeft);
-  SerialBT.println(pidRight);
+  SerialBT.println(getPosition());
+ 
 }
 
 int velL = 60;
 int velR = 65;
-
 
 void printOptions()
 {
@@ -194,7 +193,6 @@ void printOptions()
   SerialBT.println(" (3) velR + 1 / (4) velR - 1");
 }
 
-
 void menuBT()
 {
   if (SerialBT.available())
@@ -209,7 +207,7 @@ void menuBT()
     }
     case 'A':
     {
-      run = true ;
+      run = true;
       break;
     }
     case 'B':
