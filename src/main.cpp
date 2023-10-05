@@ -18,6 +18,12 @@ bool run = false;
 #define M2A_CHANEL 13
 #define M2B_CHANEL 15
 
+#define derivateMax 7000
+#define derivateMin -7000
+
+#define proMax 3500
+#define proMin -3500
+
 //valores pre definidos
 
 //para sumar o restar velocidades
@@ -39,7 +45,7 @@ int integral = 0;
 int lastErr = 0;
 
 //variables configurables para el pid
-float kp = 0.73;
+float kp = 0.70;
 float ki = 0;
 float kd = 0;
 
@@ -47,10 +53,14 @@ float speed = 0;
 
 //velocidad crucero es la velocidad que se 
 //utiliza para el pid y es el pico en rectas
-int velocity = 60;
+int velocity = 90;
 
 //floats para almacenar los valores de los pid
 //de cada motor
+
+
+
+
 float pidLeft = 0;
 float pidRight = 0;
 
@@ -66,8 +76,8 @@ int gateRight = 4500;
 
 // lock : es el pwm  que va a 
 //usar el motor para frenar
-int lockLeft = 70;
-int lockRight = 60;
+int lockLeft = 80;
+int lockRight = 80;
 
 BluetoothSerial SerialBT;
 
@@ -142,32 +152,37 @@ void PID()
 
   speed = (proportional * kp) + (derivative * kd) + (integral * ki);
 
+  int maxPid = (proMax * kp) + (derivateMax * kd);
+  int minPid = -maxPid;
+
+  int PiD = map(speed, minPid, maxPid, minSpeed, maxSpeed);
+
   lastErr = proportional;
 
-  pidLeft = (velocity + speed + COMPENSATION_PWM);
-  pidRight = (velocity - speed);
+  pidLeft = (velocity + PiD );
+  pidRight = (velocity - PiD);
 
-  if (pidLeft > maxSpeed + COMPENSATION_PWM) pidLeft = maxSpeed + COMPENSATION_PWM;
-  else if (pidLeft < minSpeed) pidLeft = minSpeed;
+  // if (pidLeft > maxSpeed + COMPENSATION_PWM) pidLeft = maxSpeed + COMPENSATION_PWM;
+  // else if (pidLeft < minSpeed) pidLeft = minSpeed;
 
-  if (pidRight < minSpeed) pidRight = minSpeed;
-  else if (pidRight > maxSpeed) pidRight = maxSpeed;
+  // if (pidRight < minSpeed) pidRight = minSpeed;
+  // else if (pidRight > maxSpeed) pidRight = maxSpeed;
 
-  if (position >= gateRight)
-  {
+  // if (position >= gateRight)
+  // {
+  //   motorLeft->GoAvance(pidLeft);
+  //   motorRight->GoBack(lockRight);
+  // }
+  // else if (position <= gateLeft)
+  // {
+  //   motorLeft->GoBack(lockLeft);
+  //   motorRight->GoAvance(pidRight);
+  // }
+  // else
+  // {
     motorLeft->GoAvance(pidLeft);
-    motorRight->GoBack(lockRight);
-  }
-  else if (position <= gateLeft)
-  {
-    motorLeft->GoBack(lockLeft);
     motorRight->GoAvance(pidRight);
-  }
-  else
-  {
-    motorLeft->GoAvance(pidLeft);
-    motorRight->GoAvance(pidRight);
-  }
+  // }
 
 }
 
@@ -330,61 +345,61 @@ void menuBT()
     }
     case '1':
     {
-      lockLeft + VALUE_5;
+      lockLeft += VALUE_5;
       printOptions();
       break;
     }
     case '2':
     {
-      lockLeft - VALUE_5;
+      lockLeft -= VALUE_5;
       printOptions();
       break;
     }
     case '3':
     {
-      lockRight + VALUE_5;
+      lockRight += VALUE_5;
       printOptions();
       break;
     }
     case '4':
     {
-      lockRight - VALUE_5;
+      lockRight -= VALUE_5;
       printOptions();
       break;
     }
    case '5':
     {
-      maxSpeed + VALUE_5;
+      maxSpeed += VALUE_5;
       printOptions();
       break;
     }
     case '6':
     {
-      maxSpeed - VALUE_5;
+      maxSpeed -= VALUE_5;
       printOptions();
       break;
     }
     case '7':
     {
-      gateLeft + VALUE_500;
+      gateLeft += VALUE_500;
       printOptions();
       break;
     }
     case '8':
     {
-      gateLeft - VALUE_500;
+      gateLeft -= VALUE_500;
       printOptions();
       break;
     }
         case '9':
     {
-      gateRight + VALUE_500;
+      gateRight += VALUE_500;
       printOptions();
       break;
     }
     case '0':
     {
-     gateRight - VALUE_500;
+     gateRight -= VALUE_500;
       printOptions();
       break;
     }
