@@ -2,19 +2,11 @@
 #include <QTRSensors.h>
 #include <Motor.h>
 
-// #define sensor1 = 13
-// #define sensor2 = 27
-// #define sensor3 = 26
-// #define sensor4 = 25
-// #define sensor5 = 33
-// #define sensor6 = 32
-// #define sensor7 = 35
-// #define sensor8 = 34
-
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 
+//boleano para que se ejecute el pid
 bool run = false;
 
 #define M1A 19
@@ -26,24 +18,56 @@ bool run = false;
 #define M2A_CHANEL 13
 #define M2B_CHANEL 15
 
+//valores pre definidos
+
+//para sumar o restar velocidades
+#define VALUE_5 5
+
+//para sumar o restar el gate
+#define VALUE_500 500
+
+//para sumar o restas a 
+// kp, ki, kd
+#define VALUE_0_1 0.1
+#define VALUE_0_01 0.01
+
+#define COMPENSATION_PWM 5
+
 int proportional = 0;
 int derivative = 0;
 int integral = 0;
 int lastErr = 0;
 
+//variables configurables para el pid
 float kp = 0.73;
 float ki = 0;
 float kd = 0;
 
 float speed = 0;
 
+//velocidad crucero es la velocidad que se 
+//utiliza para el pid y es el pico en rectas
 int velocity = 60;
 
+//floats para almacenar los valores de los pid
+//de cada motor
 float pidLeft = 0;
 float pidRight = 0;
 
+//estos son los valores maximos y minimos
+//de los motores cuando se le aplica el pid
 int maxSpeed = 150;
 int minSpeed = 0;
+
+// gete es la barrera que sirve como flag
+//para las condicionales de giro
+int gateLeft = 2500;
+int gateRight = 4500;
+
+// lock : es el pwm  que va a 
+//usar el motor para frenar
+int lockLeft = 70;
+int lockRight = 60;
 
 BluetoothSerial SerialBT;
 
@@ -53,6 +77,7 @@ MOTOR *motorLeft = new MOTOR(M1B, M1A, M1B_CHANEL, M1A_CHANEL);
 
 MOTOR *motorRight = new MOTOR(M2A, M2B, M2B_CHANEL, M2A_CHANEL);
 
+//setpoint : es el punto en el que se desea
 int setpoint = 3500;
 
 const uint8_t SensorCount = 8;
@@ -78,45 +103,32 @@ void calibration()
   digitalWrite(Led, LOW);
 }
 
+//funcion que nos va a retornar la posicion
+// de la linea
 int getPosition()
 {
   int position = qtr.readLineBlack(sensorValues);
   return position;
 }
 
-void printPositionAndSensors()
-{
-  int position = qtr.readLineBlack(sensorValues);
+//funcion que se utiliza para debug de los sensores
 
-  for (uint8_t i = 0; i < SensorCount; i++)
-  {
-    SerialBT.print(sensorValues[i]);
-    SerialBT.print(" || ");
-  }
-  SerialBT.println(position);
-  SerialBT.print('\n');
+// [ en desuso ]
 
-  delay(250);
-}
+// void printPositionAndSensors()
+// {
+//   int position = qtr.readLineBlack(sensorValues);
 
-void setKp()
-{
-  SerialBT.println("Ingrese la el valor para Kp");
-  float newKp = SerialBT.read();
-  delay(3000);
-  kp = newKp;
-  SerialBT.print("El nuevo valor es: ");
-  SerialBT.println(kp);
-  SerialBT.println("Sali");
-}
+//   for (uint8_t i = 0; i < SensorCount; i++)
+//   {
+//     SerialBT.print(sensorValues[i]);
+//     SerialBT.print(" || ");
+//   }
+//   SerialBT.println(position);
+//   SerialBT.print('\n');
 
-void printMainMenu()
-{
-  SerialBT.println("- M Mostrar el menu");
-  SerialBT.println("- A Encender motores");
-  SerialBT.println("- B Apagar motores");
-  SerialBT.println("- D Menu de configuracion del PID");
-}
+//   delay(250);
+// }
 
 void PID()
 {
@@ -126,33 +138,29 @@ void PID()
 
   derivative = proportional - lastErr;
 
-  integral = integral + proportional;
+  integral += proportional;
 
   speed = (proportional * kp) + (derivative * kd) + (integral * ki);
 
   lastErr = proportional;
 
-  pidLeft = (velocity + speed + 5);
+  pidLeft = (velocity + speed + COMPENSATION_PWM);
   pidRight = (velocity - speed);
 
-  if (pidLeft > maxSpeed + 5)
-    pidLeft = maxSpeed + 5;
-  else if (pidLeft < minSpeed)
-    pidLeft = minSpeed;
+  if (pidLeft > maxSpeed + COMPENSATION_PWM) pidLeft = maxSpeed + COMPENSATION_PWM;
+  else if (pidLeft < minSpeed) pidLeft = minSpeed;
 
-  if (pidRight < minSpeed)
-    pidRight = minSpeed;
-  else if (pidRight > maxSpeed)
-    pidRight = maxSpeed;
+  if (pidRight < minSpeed) pidRight = minSpeed;
+  else if (pidRight > maxSpeed) pidRight = maxSpeed;
 
-  if (position >= 4500)
+  if (position >= gateRight)
   {
     motorLeft->GoAvance(pidLeft);
-    motorRight->GoBack(60);
+    motorRight->GoBack(lockRight);
   }
-  else if (position <= 2500)
+  else if (position <= gateLeft)
   {
-    motorLeft->GoBack(70);
+    motorLeft->GoBack(lockLeft);
     motorRight->GoAvance(pidRight);
   }
   else
@@ -161,12 +169,9 @@ void PID()
     motorRight->GoAvance(pidRight);
   }
 
-  SerialBT.println(getPosition());
 }
 
-int velL = 60;
-int velR = 65;
-
+//funcion que imprime un menu por bluetooth
 void printOptions()
 {
   // clean the serial
@@ -186,11 +191,20 @@ void printOptions()
   SerialBT.print("- KD = ");
   SerialBT.println(kd);
 
-  SerialBT.print("- velL = ");
-  SerialBT.println(velL);
+  SerialBT.print("- maxSpeed = ");
+  SerialBT.println(maxSpeed);
 
-  SerialBT.print("- velR = ");
-  SerialBT.println(velR);
+  SerialBT.print("- lockLeft = ");
+  SerialBT.println(lockLeft);
+
+  SerialBT.print("- lockRight = ");
+  SerialBT.println(lockRight);
+
+  SerialBT.print("- gateLeft = ");
+  SerialBT.println(gateLeft);
+
+  SerialBT.print("- gateRight = ");
+  SerialBT.println(gateRight);
 
   SerialBT.println(" (K) KP + 0.1 / (L) KP - 0.1");
   SerialBT.println(" (Q) KP + 0.01 / (W) KP - 0.01");
@@ -201,8 +215,16 @@ void printOptions()
   SerialBT.println(" (Z) KD + 0.1 / (X) KD - 0.1");
   SerialBT.println(" (G) KD + 0.01 / (H) KD - 00.1");
 
-  SerialBT.println(" (1) velL + 1 / (2) velL - 1");
-  SerialBT.println(" (3) velR + 1 / (4) velR - 1");
+  SerialBT.println(" (1) lockLeft + 5 / (2) lockLeft - 5");
+  SerialBT.println(" (3) lockRight + 5 / (4) lockRight - 5");
+
+  SerialBT.println(" (5) maxSpeed + 5 / (6) maxSpeed - 5");
+
+  SerialBT.println(" (7) gateLeft + 500 / (8) gateLeft - 500");
+  SerialBT.println(" (9) gateRight + 500 / (0) gateRight - 500");
+
+  SerialBT.println(" (F) para ver la posicion");
+
 }
 
 void menuBT()
@@ -229,75 +251,75 @@ void menuBT()
     }
     case 'K':
     {
-      kp += 0.1;
+      kp += VALUE_0_1;
       printOptions();
       break;
     }
     case 'L':
     {
-      kp -= 0.1;
+      kp -= VALUE_0_1;
       printOptions();
       break;
     }
     case 'Q':
     {
-      kp += 0.01;
+      kp += VALUE_0_01;
       printOptions();
       break;
     }
     case 'W':
     {
-      kp -= 0.01;
+      kp -= VALUE_0_01;
       printOptions();
       break;
     }
 
     case 'R':
     {
-      ki += 0.1;
+      ki += VALUE_0_1;
       printOptions();
       break;
     }
     case 'T':
     {
-      ki -= 0.1;
+      ki -= VALUE_0_1;
       printOptions();
       break;
     }
     case 'U':
     {
-      ki += 0.01;
+      ki += VALUE_0_01;
       printOptions();
       break;
     }
     case 'I':
     {
-      ki -= 0.01;
+      ki -= VALUE_0_01;
       printOptions();
       break;
     }
 
     case 'Z':
     {
-      kd += 0.1;
+      kd += VALUE_0_1;
       printOptions();
       break;
     }
     case 'X':
     {
-      kd -= 0.1;
+      kd -= VALUE_0_1;
       printOptions();
       break;
     }
     case 'G':
     {
-      kd += 0.01;
+      kd += VALUE_0_01;
       printOptions();
       break;
     }
     case 'H':
     {
-      kd -= 0.01;
+      kd -= VALUE_0_01;
       printOptions();
       break;
     }
@@ -308,25 +330,61 @@ void menuBT()
     }
     case '1':
     {
-      velL++;
+      lockLeft + VALUE_5;
       printOptions();
       break;
     }
     case '2':
     {
-      velL--;
+      lockLeft - VALUE_5;
       printOptions();
       break;
     }
     case '3':
     {
-      velR++;
+      lockRight + VALUE_5;
       printOptions();
       break;
     }
     case '4':
     {
-      velR--;
+      lockRight - VALUE_5;
+      printOptions();
+      break;
+    }
+   case '5':
+    {
+      maxSpeed + VALUE_5;
+      printOptions();
+      break;
+    }
+    case '6':
+    {
+      maxSpeed - VALUE_5;
+      printOptions();
+      break;
+    }
+    case '7':
+    {
+      gateLeft + VALUE_500;
+      printOptions();
+      break;
+    }
+    case '8':
+    {
+      gateLeft - VALUE_500;
+      printOptions();
+      break;
+    }
+        case '9':
+    {
+      gateRight + VALUE_500;
+      printOptions();
+      break;
+    }
+    case '0':
+    {
+     gateRight - VALUE_500;
       printOptions();
       break;
     }
@@ -339,8 +397,7 @@ void menuBT()
 
 void setup()
 {
-  Serial.begin(9600);
-  SerialBT.begin("ESP32test");
+  SerialBT.begin("Coyote");
   pinMode(Led, OUTPUT);
   calibration();
   pinMode(LedB, OUTPUT);
@@ -350,9 +407,6 @@ void setup()
 
 void loop()
 {
-  // motorLeft->GoAvance(velL);
-
-  // motorRight->GoAvance(velR);
   menuBT();
 
   if (run)
@@ -364,11 +418,4 @@ void loop()
     motorLeft->Still();
     motorRight->Still();
   }
-
-  // SerialBT.println('motor left');
-  // SerialBT.println(pidLeft);
-  // SerialBT.println('motor right');
-  // SerialBT.println(pidRight);
-
-  // motorLeft->GoAvance(50);
 }
