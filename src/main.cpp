@@ -31,18 +31,18 @@ int derivative = 0;
 int integral = 0;
 int lastErr = 0;
 
-float kp = 0.53;
+float kp = 0.73;
 float ki = 0;
 float kd = 0;
 
 float speed = 0;
 
-int velocity = 80;
+int velocity = 60;
 
 float pidLeft = 0;
 float pidRight = 0;
 
-int maxSpeed = 200;
+int maxSpeed = 150;
 int minSpeed = 0;
 
 BluetoothSerial SerialBT;
@@ -145,11 +145,23 @@ void PID()
   else if (pidRight > maxSpeed)
     pidRight = maxSpeed;
 
-  motorLeft->GoAvance(pidLeft);
-  motorRight->GoAvance(pidRight);
+  if (position >= 4500)
+  {
+    motorLeft->GoAvance(pidLeft);
+    motorRight->GoBack(60);
+  }
+  else if (position <= 2500)
+  {
+    motorLeft->GoBack(70);
+    motorRight->GoAvance(pidRight);
+  }
+  else
+  {
+    motorLeft->GoAvance(pidLeft);
+    motorRight->GoAvance(pidRight);
+  }
 
   SerialBT.println(getPosition());
- 
 }
 
 int velL = 60;
