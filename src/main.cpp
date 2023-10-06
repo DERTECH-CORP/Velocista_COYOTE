@@ -6,7 +6,7 @@
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
 #endif
 
-//boleano para que se ejecute el pid
+// boleano para que se ejecute el pid
 bool run = false;
 
 #define M1A 19
@@ -18,16 +18,16 @@ bool run = false;
 #define M2A_CHANEL 13
 #define M2B_CHANEL 15
 
-//valores pre definidos
+// valores pre definidos
 
-//para sumar o restar velocidades
+// para sumar o restar velocidades
 #define VALUE_5 5
 
-//para sumar o restar el gate
+// para sumar o restar el gate
 #define VALUE_500 500
 
-//para sumar o restas a 
-// kp, ki, kd
+// para sumar o restas a
+//  kp, ki, kd
 #define VALUE_0_1 0.1
 #define VALUE_0_01 0.01
 
@@ -38,35 +38,37 @@ int derivative = 0;
 int integral = 0;
 int lastErr = 0;
 
-//variables configurables para el pid
-float kp = 0.73;
+// variables configurables para el pid
+float kp = 0.23;
 float ki = 0;
 float kd = 0;
 
 float speed = 0;
 
-//velocidad crucero es la velocidad que se 
-//utiliza para el pid y es el pico en rectas
-int velocity = 60;
+// velocidad crucero es la velocidad que se
+// utiliza para el pid y es el pico en rectas
+int velocity = 85;
 
-//floats para almacenar los valores de los pid
-//de cada motor
+int velocityTurn = 70;
+
+// floats para almacenar los valores de los pid
+// de cada motor
 float pidLeft = 0;
 float pidRight = 0;
 
-//estos son los valores maximos y minimos
-//de los motores cuando se le aplica el pid
+// estos son los valores maximos y minimos
+// de los motores cuando se le aplica el pid
 int maxSpeed = 150;
 int minSpeed = 0;
 
 // gete es la barrera que sirve como flag
-//para las condicionales de giro
+// para las condicionales de giro
 int gateLeft = 2500;
-int gateRight = 4500;
+int gateRight = 5000;
 
-// lock : es el pwm  que va a 
-//usar el motor para frenar
-int lockLeft = 70;
+// lock : es el pwm  que va a
+// usar el motor para frenar
+int lockLeft = 80;
 int lockRight = 60;
 
 BluetoothSerial SerialBT;
@@ -77,7 +79,7 @@ MOTOR *motorLeft = new MOTOR(M1B, M1A, M1B_CHANEL, M1A_CHANEL);
 
 MOTOR *motorRight = new MOTOR(M2A, M2B, M2B_CHANEL, M2A_CHANEL);
 
-//setpoint : es el punto en el que se desea
+// setpoint : es el punto en el que se desea
 int setpoint = 3500;
 
 const uint8_t SensorCount = 8;
@@ -103,15 +105,15 @@ void calibration()
   digitalWrite(Led, LOW);
 }
 
-//funcion que nos va a retornar la posicion
-// de la linea
+// funcion que nos va a retornar la posicion
+//  de la linea
 int getPosition()
 {
   int position = qtr.readLineBlack(sensorValues);
   return position;
 }
 
-//funcion que se utiliza para debug de los sensores
+// funcion que se utiliza para debug de los sensores
 
 // [ en desuso ]
 
@@ -147,31 +149,34 @@ void PID()
   pidLeft = (velocity + speed + COMPENSATION_PWM);
   pidRight = (velocity - speed);
 
-  if (pidLeft > maxSpeed + COMPENSATION_PWM) pidLeft = maxSpeed + COMPENSATION_PWM;
-  else if (pidLeft < minSpeed) pidLeft = minSpeed;
+  if (pidLeft > maxSpeed + COMPENSATION_PWM)
+    pidLeft = maxSpeed + COMPENSATION_PWM;
+  else if (pidLeft < minSpeed)
+    pidLeft = minSpeed;
 
-  if (pidRight < minSpeed) pidRight = minSpeed;
-  else if (pidRight > maxSpeed) pidRight = maxSpeed;
+  if (pidRight < minSpeed)
+    pidRight = minSpeed;
+  else if (pidRight > maxSpeed)
+    pidRight = maxSpeed;
 
   if (position >= gateRight)
   {
-    motorLeft->GoAvance(pidLeft);
+    motorLeft->GoAvance(velocityTurn);
     motorRight->GoBack(lockRight);
   }
   else if (position <= gateLeft)
   {
     motorLeft->GoBack(lockLeft);
-    motorRight->GoAvance(pidRight);
+    motorRight->GoAvance(velocityTurn);
   }
   else
   {
     motorLeft->GoAvance(pidLeft);
     motorRight->GoAvance(pidRight);
   }
-
 }
 
-//funcion que imprime un menu por bluetooth
+// funcion que imprime un menu por bluetooth
 void printOptions()
 {
   // clean the serial
@@ -206,6 +211,9 @@ void printOptions()
   SerialBT.print("- gateRight = ");
   SerialBT.println(gateRight);
 
+  SerialBT.print("- velocityTurn = ");
+  SerialBT.println(velocityTurn);
+
   SerialBT.println(" (K) KP + 0.1 / (L) KP - 0.1");
   SerialBT.println(" (Q) KP + 0.01 / (W) KP - 0.01");
 
@@ -223,8 +231,9 @@ void printOptions()
   SerialBT.println(" (7) gateLeft + 500 / (8) gateLeft - 500");
   SerialBT.println(" (9) gateRight + 500 / (0) gateRight - 500");
 
-  SerialBT.println(" (F) para ver la posicion");
+  SerialBT.println(" (+) velocityTurn + 1 / (-) velocityTurn - 1");
 
+  SerialBT.println(" (F) para ver la posicion");
 }
 
 void menuBT()
@@ -330,61 +339,73 @@ void menuBT()
     }
     case '1':
     {
-      lockLeft + VALUE_5;
+      lockLeft += VALUE_5;
       printOptions();
       break;
     }
     case '2':
     {
-      lockLeft - VALUE_5;
+      lockLeft -= VALUE_5;
       printOptions();
       break;
     }
     case '3':
     {
-      lockRight + VALUE_5;
+      lockRight += VALUE_5;
       printOptions();
       break;
     }
     case '4':
     {
-      lockRight - VALUE_5;
+      lockRight -= VALUE_5;
       printOptions();
       break;
     }
-   case '5':
+    case '5':
     {
-      maxSpeed + VALUE_5;
+      maxSpeed += VALUE_5;
       printOptions();
       break;
     }
     case '6':
     {
-      maxSpeed - VALUE_5;
+      maxSpeed -= VALUE_5;
       printOptions();
       break;
     }
     case '7':
     {
-      gateLeft + VALUE_500;
+      gateLeft += VALUE_500;
       printOptions();
       break;
     }
     case '8':
     {
-      gateLeft - VALUE_500;
+      gateLeft -= VALUE_500;
       printOptions();
       break;
     }
-        case '9':
+    case '9':
     {
-      gateRight + VALUE_500;
+      gateRight += VALUE_500;
       printOptions();
       break;
     }
     case '0':
     {
-     gateRight - VALUE_500;
+      gateRight -= VALUE_500;
+      printOptions();
+      break;
+    }
+    case '+':
+    {
+      velocityTurn += 1;
+      printOptions();
+      break;
+    }
+    case '-':
+    {
+      velocityTurn -= 1;
       printOptions();
       break;
     }
