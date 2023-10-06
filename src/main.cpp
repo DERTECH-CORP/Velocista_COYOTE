@@ -163,13 +163,27 @@ void PID()
 
   if (position >= gateRight)
   {
+    if (position >= 6000)
+    {
+      motorLeft->GoBack(50);
+      motorRight->GoBack(90);
+    }else{
     motorLeft->GoAvance(velocityTurn);
     motorRight->GoBack(lockRight);
+
+    }
   }
   else if (position <= gateLeft)
   {
+        if (position <= 1000)
+    {
+      motorLeft->GoBack(90);
+      motorRight->GoBack(50);
+    }else{
     motorLeft->GoBack(lockLeft);
     motorRight->GoAvance(velocityTurn);
+
+    }
   }
   else
   {
@@ -433,10 +447,10 @@ bool isPress = false;
 
 void loop()
 {
-  if (digitalRead(BUTTON) == HIGH) isPress = true;
+  // if (digitalRead(BUTTON) == LOW) isPress = true;
   menuBT();
 
-  if (isPress)
+  if (run)
   {
     PID();
   }
