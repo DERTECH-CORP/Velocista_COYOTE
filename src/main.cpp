@@ -18,6 +18,8 @@ bool run = false;
 #define M2A_CHANEL 13
 #define M2B_CHANEL 15
 
+#define BUTTON 16
+
 // valores pre definidos
 
 // para sumar o restar velocidades
@@ -422,15 +424,19 @@ void setup()
   pinMode(Led, OUTPUT);
   calibration();
   pinMode(LedB, OUTPUT);
+  pinMode(BUTTON, INPUT);
   delay(2000);
   digitalWrite(LedB, HIGH);
 }
 
+bool isPress = false;
+
 void loop()
 {
+  if (digitalRead(BUTTON) == HIGH) isPress = true;
   menuBT();
 
-  if (run)
+  if (isPress)
   {
     PID();
   }
