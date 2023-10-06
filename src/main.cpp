@@ -66,8 +66,8 @@ float pidRight = 0;
 
 //estos son los valores maximos y minimos
 //de los motores cuando se le aplica el pid
-int maxSpeed = 150;
-int minSpeed = 0;
+int maxSpeed = velocity;
+int minSpeed = -velocity;
 
 // gete es la barrera que sirve como flag
 //para las condicionales de giro
@@ -180,8 +180,8 @@ void PID()
   // }
   // else
   // {
-    motorLeft->GoAvance(pidLeft);
-    motorRight->GoAvance(pidRight);
+    // motorLeft->GoAvance(pidLeft);
+    // motorRight->GoAvance(pidRight);
   // }
 
 }
