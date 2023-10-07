@@ -41,15 +41,15 @@ int integral = 0;
 int lastErr = 0;
 
 // variables configurables para el pid
-float kp = 0.23;
+float kp = 0.03;
 float ki = 0;
-float kd = 0;
+float kd = 0.06;
 
 float speed = 0;
 
 // velocidad crucero es la velocidad que se
 // utiliza para el pid y es el pico en rectas
-int velocity = 85;
+int velocity = 70;
 
 int velocityTurn = 70;
 
@@ -70,7 +70,7 @@ int gateRight = 5000;
 
 // lock : es el pwm  que va a
 // usar el motor para frenar
-int lockLeft = 80;
+int lockLeft = 75;
 int lockRight = 60;
 
 BluetoothSerial SerialBT;
@@ -111,28 +111,11 @@ void calibration()
 //  de la linea
 int getPosition()
 {
-  int position = qtr.readLineBlack(sensorValues);
+  int position = qtr.readLineWhite(sensorValues);
   return position;
 }
 
-// funcion que se utiliza para debug de los sensores
 
-// [ en desuso ]
-
-// void printPositionAndSensors()
-// {
-//   int position = qtr.readLineBlack(sensorValues);
-
-//   for (uint8_t i = 0; i < SensorCount; i++)
-//   {
-//     SerialBT.print(sensorValues[i]);
-//     SerialBT.print(" || ");
-//   }
-//   SerialBT.println(position);
-//   SerialBT.print('\n');
-
-//   delay(250);
-// }
 
 void PID()
 {
@@ -163,27 +146,19 @@ void PID()
 
   if (position >= gateRight)
   {
-    if (position >= 6000)
-    {
-      motorLeft->GoBack(50);
-      motorRight->GoBack(90);
-    }else{
+
     motorLeft->GoAvance(velocityTurn);
     motorRight->GoBack(lockRight);
 
-    }
+    
   }
   else if (position <= gateLeft)
   {
-        if (position <= 1000)
-    {
-      motorLeft->GoBack(90);
-      motorRight->GoBack(50);
-    }else{
+
     motorLeft->GoBack(lockLeft);
     motorRight->GoAvance(velocityTurn);
 
-    }
+    
   }
   else
   {
@@ -434,12 +409,10 @@ void menuBT()
 
 void setup()
 {
-  SerialBT.begin("Coyote");
   pinMode(Led, OUTPUT);
   calibration();
   pinMode(LedB, OUTPUT);
   pinMode(BUTTON, INPUT);
-  delay(2000);
   digitalWrite(LedB, HIGH);
 }
 
@@ -447,16 +420,10 @@ bool isPress = false;
 
 void loop()
 {
-  // if (digitalRead(BUTTON) == LOW) isPress = true;
-  menuBT();
+  if (digitalRead(BUTTON) == LOW) isPress = true;
 
-  if (run)
+  if (isPress)
   {
     PID();
-  }
-  else
-  {
-    motorLeft->Still();
-    motorRight->Still();
   }
 }
