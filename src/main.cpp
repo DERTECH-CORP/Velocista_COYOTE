@@ -49,9 +49,9 @@ float speed = 0;
 
 // velocidad crucero es la velocidad que se
 // utiliza para el pid y es el pico en rectas
-int velocity = 70;
+int velocity = 120;
 
-int velocityTurn = 70;
+int velocityTurn = 80;
 
 // floats para almacenar los valores de los pid
 // de cada motor
@@ -70,8 +70,8 @@ int gateRight = 5000;
 
 // lock : es el pwm  que va a
 // usar el motor para frenar
-int lockLeft = 75;
-int lockRight = 60;
+int lockLeft = 85;
+int lockRight = 70;
 
 BluetoothSerial SerialBT;
 
