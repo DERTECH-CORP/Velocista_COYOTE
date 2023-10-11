@@ -49,7 +49,7 @@ float speed = 0;
 
 // velocidad crucero es la velocidad que se
 // utiliza para el pid y es el pico en rectas
-int velocity = 120;
+int velocity = 90;
 
 int velocityTurn = 80;
 
@@ -111,7 +111,7 @@ void calibration()
 //  de la linea
 int getPosition()
 {
-  int position = qtr.readLineWhite(sensorValues);
+  int position = qtr.readLineBlack(sensorValues);
   return position;
 }
 
