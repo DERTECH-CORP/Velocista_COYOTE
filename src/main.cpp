@@ -49,9 +49,9 @@ float speed = 0;
 
 // velocidad crucero es la velocidad que se
 // utiliza para el pid y es el pico en rectas
-int velocity = 90;
+int velocity = 65;
 
-int velocityTurn = 80;
+int velocityTurn = 90;
 
 // floats para almacenar los valores de los pid
 // de cada motor
@@ -65,13 +65,13 @@ int minSpeed = 0;
 
 // gete es la barrera que sirve como flag
 // para las condicionales de giro
-int gateLeft = 2500;
-int gateRight = 5000;
+int gateLeft = 5000;
+int gateRight = 6000;
 
 // lock : es el pwm  que va a
 // usar el motor para frenar
-int lockLeft = 85;
-int lockRight = 70;
+int lockLeft = 75;
+int lockRight = 80;
 
 BluetoothSerial SerialBT;
 
@@ -82,7 +82,7 @@ MOTOR *motorLeft = new MOTOR(M1B, M1A, M1B_CHANEL, M1A_CHANEL);
 MOTOR *motorRight = new MOTOR(M2A, M2B, M2B_CHANEL, M2A_CHANEL);
 
 // setpoint : es el punto en el que se desea
-int setpoint = 3500;
+int setpoint = 5500;
 
 const uint8_t SensorCount = 8;
 uint16_t sensorValues[SensorCount];
@@ -111,7 +111,7 @@ void calibration()
 //  de la linea
 int getPosition()
 {
-  int position = qtr.readLineBlack(sensorValues);
+  int position = qtr.readLineWhite(sensorValues);
   return position;
 }
 
@@ -409,6 +409,7 @@ void menuBT()
 
 void setup()
 {
+  SerialBT.begin("coyote");
   pinMode(Led, OUTPUT);
   calibration();
   pinMode(LedB, OUTPUT);
@@ -421,6 +422,10 @@ bool isPress = false;
 void loop()
 {
   if (digitalRead(BUTTON) == LOW) isPress = true;
+
+  menuBT();
+
+SerialBT.println(getPosition());
 
   if (isPress)
   {
