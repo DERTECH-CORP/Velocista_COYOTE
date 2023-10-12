@@ -49,9 +49,9 @@ float speed = 0;
 
 // velocidad crucero es la velocidad que se
 // utiliza para el pid y es el pico en rectas
-int velocity = 65;
+int velocity = 90;
 
-int velocityTurn = 90;
+int velocityTurn = 120;
 
 // floats para almacenar los valores de los pid
 // de cada motor
