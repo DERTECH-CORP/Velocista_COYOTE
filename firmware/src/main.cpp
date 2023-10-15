@@ -61,7 +61,7 @@ float pidRight = 0;
 // estos son los valores maximos y minimos
 // de los motores cuando se le aplica el pid
 int maxSpeed = 150;
-int minSpeed = 0;
+int minSpeed = 40;
 
 // gete es la barrera que sirve como flag
 // para las condicionales de giro
@@ -115,8 +115,6 @@ int getPosition()
   return position;
 }
 
-
-
 void PID()
 {
   int position = getPosition();
@@ -144,21 +142,28 @@ void PID()
   else if (pidRight > maxSpeed)
     pidRight = maxSpeed;
 
-  if (position >= gateRight)
+  if (pidLeft <= minSpeed)
   {
+    Serial.println("LEFT");
+    Serial.println(pidLeft + velocity);
 
-    motorLeft->GoAvance(velocityTurn);
-    motorRight->GoBack(lockRight);
+    Serial.println("RIGHT");
+    Serial.println(pidRight);
 
-    
+    motorLeft->GoBack(pidLeft + velocity);
+    motorRight->GoAvance(pidRight);
   }
-  else if (position <= gateLeft)
+  else if (pidRight <= minSpeed)
   {
 
-    motorLeft->GoBack(lockLeft);
-    motorRight->GoAvance(velocityTurn);
+    Serial.println("LEFT");
+    Serial.println(pidLeft);
 
-    
+    Serial.println("RIGHT");
+    Serial.println(pidRight + velocity);
+
+    motorLeft->GoBack(pidLeft);
+    motorRight->GoAvance(pidRight + velocity);
   }
   else
   {
@@ -421,11 +426,12 @@ bool isPress = false;
 
 void loop()
 {
-  if (digitalRead(BUTTON) == LOW) isPress = true;
+  if (digitalRead(BUTTON) == LOW)
+    isPress = true;
 
   menuBT();
 
-SerialBT.println(getPosition());
+  SerialBT.println(getPosition());
 
   if (isPress)
   {
