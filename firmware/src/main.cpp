@@ -41,9 +41,9 @@ int integral = 0;
 int lastErr = 0;
 
 // variables configurables para el pid
-float kp = 0.03;
+float kp = 0.007;
 float ki = 0;
-float kd = 0.06;
+float kd = 0;
 
 float speed = 0;
 
@@ -111,7 +111,7 @@ void calibration()
 //  de la linea
 int getPosition()
 {
-  int position = qtr.readLineWhite(sensorValues);
+  int position = qtr.readLineBlack(sensorValues);
   return position;
 }
 
@@ -144,11 +144,11 @@ void PID()
 
   if (pidLeft <= minSpeed)
   {
-    Serial.println("LEFT");
-    Serial.println(pidLeft + velocity);
+    SerialBT.println("LEFT atras");
+    SerialBT.println(pidLeft + velocity);
 
-    Serial.println("RIGHT");
-    Serial.println(pidRight);
+    SerialBT.println("RIGHT");
+    SerialBT.println(pidRight);
 
     motorLeft->GoBack(pidLeft + velocity);
     motorRight->GoAvance(pidRight);
@@ -156,17 +156,24 @@ void PID()
   else if (pidRight <= minSpeed)
   {
 
-    Serial.println("LEFT");
-    Serial.println(pidLeft);
+    SerialBT.println("LEFT");
+    SerialBT.println(pidLeft);
 
-    Serial.println("RIGHT");
-    Serial.println(pidRight + velocity);
+    SerialBT.println("RIGHT atras");
+    SerialBT.println(pidRight + velocity);
 
-    motorLeft->GoBack(pidLeft);
-    motorRight->GoAvance(pidRight + velocity);
+    motorLeft->GoAvance(pidLeft);
+    motorRight->GoBack(pidRight + velocity);
   }
   else
   {
+    
+    SerialBT.println("LEFT");
+    SerialBT.println(pidLeft);
+
+    SerialBT.println("RIGHT");
+    SerialBT.println(pidRight);
+
     motorLeft->GoAvance(pidLeft);
     motorRight->GoAvance(pidRight);
   }
@@ -184,13 +191,13 @@ void printOptions()
   SerialBT.println("Configuracion Actual:");
 
   SerialBT.print("- KP = ");
-  SerialBT.println(kp);
+  SerialBT.println(kp,5);
 
   SerialBT.print("- KI = ");
-  SerialBT.println(ki);
+  SerialBT.println(ki,5);
 
   SerialBT.print("- KD = ");
-  SerialBT.println(kd);
+  SerialBT.println(kd,5);
 
   SerialBT.print("- maxSpeed = ");
   SerialBT.println(maxSpeed);
@@ -431,9 +438,9 @@ void loop()
 
   menuBT();
 
-  SerialBT.println(getPosition());
+  // SerialBT.println(getPosition());
 
-  if (isPress)
+  if (run)
   {
     PID();
   }
