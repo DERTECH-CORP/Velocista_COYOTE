@@ -41,9 +41,9 @@ int integral = 0;
 int lastErr = 0;
 
 // variables configurables para el pid
-float kp = 0.03;
+float kp = 0.007;
 float ki = 0;
-float kd = 0.06;
+float kd = 0;
 
 float speed = 0;
 
@@ -51,7 +51,7 @@ float speed = 0;
 // utiliza para el pid y es el pico en rectas
 int velocity = 90;
 
-int velocityTurn = 80;
+int velocityTurn = 110;
 
 // floats para almacenar los valores de los pid
 // de cada motor
@@ -61,17 +61,17 @@ float pidRight = 0;
 // estos son los valores maximos y minimos
 // de los motores cuando se le aplica el pid
 int maxSpeed = 150;
-int minSpeed = 0;
+int minSpeed = 40;
 
 // gete es la barrera que sirve como flag
 // para las condicionales de giro
-int gateLeft = 2500;
-int gateRight = 5000;
+int gateLeft = 5000;
+int gateRight = 6000;
 
 // lock : es el pwm  que va a
 // usar el motor para frenar
-int lockLeft = 85;
-int lockRight = 70;
+int lockLeft = 75;
+int lockRight = 80;
 
 BluetoothSerial SerialBT;
 
@@ -82,7 +82,7 @@ MOTOR *motorLeft = new MOTOR(M1B, M1A, M1B_CHANEL, M1A_CHANEL);
 MOTOR *motorRight = new MOTOR(M2A, M2B, M2B_CHANEL, M2A_CHANEL);
 
 // setpoint : es el punto en el que se desea
-int setpoint = 3500;
+int setpoint = 5500;
 
 const uint8_t SensorCount = 8;
 uint16_t sensorValues[SensorCount];
@@ -115,8 +115,6 @@ int getPosition()
   return position;
 }
 
-
-
 void PID()
 {
   int position = getPosition();
@@ -144,24 +142,38 @@ void PID()
   else if (pidRight > maxSpeed)
     pidRight = maxSpeed;
 
-  if (position >= gateRight)
+  if (pidLeft <= minSpeed)
   {
+    SerialBT.println("LEFT atras");
+    SerialBT.println(pidLeft + velocity);
 
-    motorLeft->GoAvance(velocityTurn);
-    motorRight->GoBack(lockRight);
+    SerialBT.println("RIGHT");
+    SerialBT.println(pidRight);
 
-    
+    motorLeft->GoBack(pidLeft + velocity);
+    motorRight->GoAvance(pidRight);
   }
-  else if (position <= gateLeft)
+  else if (pidRight <= minSpeed)
   {
 
-    motorLeft->GoBack(lockLeft);
-    motorRight->GoAvance(velocityTurn);
+    SerialBT.println("LEFT");
+    SerialBT.println(pidLeft);
 
-    
+    SerialBT.println("RIGHT atras");
+    SerialBT.println(pidRight + velocity);
+
+    motorLeft->GoAvance(pidLeft);
+    motorRight->GoBack(pidRight + velocity);
   }
   else
   {
+    
+    SerialBT.println("LEFT");
+    SerialBT.println(pidLeft);
+
+    SerialBT.println("RIGHT");
+    SerialBT.println(pidRight);
+
     motorLeft->GoAvance(pidLeft);
     motorRight->GoAvance(pidRight);
   }
@@ -179,13 +191,13 @@ void printOptions()
   SerialBT.println("Configuracion Actual:");
 
   SerialBT.print("- KP = ");
-  SerialBT.println(kp);
+  SerialBT.println(kp,5);
 
   SerialBT.print("- KI = ");
-  SerialBT.println(ki);
+  SerialBT.println(ki,5);
 
   SerialBT.print("- KD = ");
-  SerialBT.println(kd);
+  SerialBT.println(kd,5);
 
   SerialBT.print("- maxSpeed = ");
   SerialBT.println(maxSpeed);
@@ -409,6 +421,7 @@ void menuBT()
 
 void setup()
 {
+  SerialBT.begin("coyote");
   pinMode(Led, OUTPUT);
   calibration();
   pinMode(LedB, OUTPUT);
@@ -420,9 +433,14 @@ bool isPress = false;
 
 void loop()
 {
-  if (digitalRead(BUTTON) == LOW) isPress = true;
+  if (digitalRead(BUTTON) == LOW)
+    isPress = true;
 
-  if (isPress)
+  menuBT();
+
+  // SerialBT.println(getPosition());
+
+  if (run)
   {
     PID();
   }
