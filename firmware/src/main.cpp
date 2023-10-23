@@ -18,6 +18,8 @@ bool run = false;
 #define M2A_CHANEL 13
 #define M2B_CHANEL 15
 
+#define BZ 18
+
 #define BUTTON 16
 
 // valores pre definidos
@@ -41,15 +43,15 @@ int integral = 0;
 int lastErr = 0;
 
 // variables configurables para el pid
-float kp = 0.007;
+float kp = 0.057;
 float ki = 0;
-float kd = 0;
+float kd = 0.1;
 
 float speed = 0;
 
 // velocidad crucero es la velocidad que se
 // utiliza para el pid y es el pico en rectas
-int velocity = 90;
+int velocity = 250;
 
 int velocityTurn = 110;
 
@@ -60,8 +62,8 @@ float pidRight = 0;
 
 // estos son los valores maximos y minimos
 // de los motores cuando se le aplica el pid
-int maxSpeed = 150;
-int minSpeed = 40;
+int maxSpeed = 250;
+int minSpeed = 60;
 
 // gete es la barrera que sirve como flag
 // para las condicionales de giro
@@ -82,7 +84,7 @@ MOTOR *motorLeft = new MOTOR(M1B, M1A, M1B_CHANEL, M1A_CHANEL);
 MOTOR *motorRight = new MOTOR(M2A, M2B, M2B_CHANEL, M2A_CHANEL);
 
 // setpoint : es el punto en el que se desea
-int setpoint = 5500;
+int setpoint = 3500;
 
 const uint8_t SensorCount = 8;
 uint16_t sensorValues[SensorCount];
@@ -144,39 +146,24 @@ void PID()
 
   if (pidLeft <= minSpeed)
   {
-    SerialBT.println("LEFT atras");
-    SerialBT.println(pidLeft + velocity);
-
-    SerialBT.println("RIGHT");
-    SerialBT.println(pidRight);
-
-    motorLeft->GoBack(pidLeft + velocity);
+    motorLeft->GoBack(pidLeft + 30);
     motorRight->GoAvance(pidRight);
   }
   else if (pidRight <= minSpeed)
   {
-
-    SerialBT.println("LEFT");
-    SerialBT.println(pidLeft);
-
-    SerialBT.println("RIGHT atras");
-    SerialBT.println(pidRight + velocity);
-
     motorLeft->GoAvance(pidLeft);
-    motorRight->GoBack(pidRight + velocity);
+    motorRight->GoBack(pidRight + 30);
+    SerialBT.print(pidLeft);
+    SerialBT.print(" || ");
+    SerialBT.println(pidRight + velocity);
   }
   else
   {
-    
-    SerialBT.println("LEFT");
-    SerialBT.println(pidLeft);
-
-    SerialBT.println("RIGHT");
-    SerialBT.println(pidRight);
-
     motorLeft->GoAvance(pidLeft);
     motorRight->GoAvance(pidRight);
   }
+
+  SerialBT.println(pidRight);
 }
 
 // funcion que imprime un menu por bluetooth
@@ -426,6 +413,7 @@ void setup()
   calibration();
   pinMode(LedB, OUTPUT);
   pinMode(BUTTON, INPUT);
+  pinMode(BZ, OUTPUT);
   digitalWrite(LedB, HIGH);
 }
 
@@ -443,5 +431,9 @@ void loop()
   if (run)
   {
     PID();
+  }
+  else {
+    motorLeft->Still();
+    motorRight->Still();
   }
 }
