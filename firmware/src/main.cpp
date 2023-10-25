@@ -43,15 +43,15 @@ int integral = 0;
 int lastErr = 0;
 
 // variables configurables para el pid
-float kp = 0.057;
+float kp = 0.06700;
 float ki = 0;
-float kd = 0.1;
+float kd = 0.15000;
 
 float speed = 0;
 
 // velocidad crucero es la velocidad que se
 // utiliza para el pid y es el pico en rectas
-int velocity = 250;
+int velocity = 200;
 
 int velocityTurn = 110;
 
@@ -63,7 +63,7 @@ float pidRight = 0;
 // estos son los valores maximos y minimos
 // de los motores cuando se le aplica el pid
 int maxSpeed = 250;
-int minSpeed = 60;
+int minSpeed = 90;
 
 // gete es la barrera que sirve como flag
 // para las condicionales de giro
@@ -131,31 +131,28 @@ void PID()
 
   lastErr = proportional;
 
-  pidLeft = (velocity + speed + COMPENSATION_PWM);
+  pidLeft = (velocity + speed);
   pidRight = (velocity - speed);
 
-  if (pidLeft > maxSpeed + COMPENSATION_PWM)
-    pidLeft = maxSpeed + COMPENSATION_PWM;
+  if (pidLeft > maxSpeed )
+    pidLeft = maxSpeed ;
   else if (pidLeft < minSpeed)
     pidLeft = minSpeed;
 
-  if (pidRight < minSpeed)
-    pidRight = minSpeed;
+  if (pidRight < minSpeed + COMPENSATION_PWM)
+    pidRight = minSpeed + COMPENSATION_PWM;
   else if (pidRight > maxSpeed)
     pidRight = maxSpeed;
 
   if (pidLeft <= minSpeed)
   {
-    motorLeft->GoBack(pidLeft + 30);
+    motorLeft->GoBack(pidLeft + 40 );
     motorRight->GoAvance(pidRight);
   }
   else if (pidRight <= minSpeed)
   {
     motorLeft->GoAvance(pidLeft);
     motorRight->GoBack(pidRight + 30);
-    SerialBT.print(pidLeft);
-    SerialBT.print(" || ");
-    SerialBT.println(pidRight + velocity);
   }
   else
   {
@@ -163,7 +160,6 @@ void PID()
     motorRight->GoAvance(pidRight);
   }
 
-  SerialBT.println(pidRight);
 }
 
 // funcion que imprime un menu por bluetooth
