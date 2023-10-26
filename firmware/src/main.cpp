@@ -126,6 +126,21 @@ void motores(int vel1, int vel2)
   SerialBT.println(vel2);
 }
 
+int frenoW = 230;
+int frenoS = 100;
+
+void frenos(){
+  if(getPosition() < 1000){
+    // motorLeft->GoBack(frenoS);
+    // motorRight->GoAvance(frenoW);
+    SerialBT.println("doblar a la izq frenos");
+  }else if (getPosition() > 6000){
+    // motorLeft->GoAvance(frenoW);
+    // motorRight->GoBack(frenoS);
+    SerialBT.println("doblar a la derecha frenos");
+  }
+}
+
 void PID()
 {
   int position = getPosition();
@@ -439,6 +454,7 @@ void loop()
 
   if (run)
   {
+    frenos();
     PID();
   }
   else
