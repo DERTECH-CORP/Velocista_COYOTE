@@ -35,7 +35,7 @@ bool run = false;
 #define VALUE_0_1 0.1
 #define VALUE_0_01 0.01
 
-#define COMPENSATION_PWM 5
+#define COMPENSATION_PWM 0
 
 int proportional = 0;
 int derivative = 0;
@@ -43,7 +43,7 @@ int integral = 0;
 int lastErr = 0;
 
 // variables configurables para el pid
-float kp = 0.06700;
+float kp = 0.16700;
 float ki = 0;
 float kd = 0.15000;
 
@@ -146,13 +146,13 @@ void PID()
 
   if (pidLeft <= minSpeed)
   {
-    motorLeft->GoBack(pidLeft + 40 );
+    motorLeft->GoBack(pidLeft + 50 );
     motorRight->GoAvance(pidRight);
   }
   else if (pidRight <= minSpeed)
   {
     motorLeft->GoAvance(pidLeft);
-    motorRight->GoBack(pidRight + 30);
+    motorRight->GoBack(pidRight + 40);
   }
   else
   {
