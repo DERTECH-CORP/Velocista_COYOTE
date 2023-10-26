@@ -102,7 +102,7 @@ void calibration()
   delay(500);
   pinMode(Led, OUTPUT);
   digitalWrite(Led, HIGH);
-  for (uint16_t i = 0; i < 500; i++)
+  for (uint16_t i = 0; i < 250; i++)
   {
     qtr.calibrate();
   }
