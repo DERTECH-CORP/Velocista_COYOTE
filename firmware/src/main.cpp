@@ -117,6 +117,15 @@ int getPosition()
   return position;
 }
 
+void motores(int vel1, int vel2)
+{
+  // motorLeft->GoAvance(vel1);
+  // motorRight->GoAvance(vel2);
+
+  SerialBT.println(vel1);
+  SerialBT.println(vel2);
+}
+
 void PID()
 {
   int position = getPosition();
@@ -131,35 +140,39 @@ void PID()
 
   lastErr = proportional;
 
-  pidLeft = (velocity + speed);
-  pidRight = (velocity - speed);
+  if (speed > velocity)
+    speed = velocity;
+  else if (speed < -velocity)
+    speed = -velocity;
+  (speed < 0) ? motores(velocity, velocity + speed) : motores(velocity - speed, velocity);
+  // pidLeft = (velocity + speed);
+  // pidRight = (velocity - speed);
 
-  if (pidLeft > maxSpeed )
-    pidLeft = maxSpeed ;
-  else if (pidLeft < minSpeed)
-    pidLeft = minSpeed;
+  // if (pidLeft > maxSpeed )
+  //   pidLeft = maxSpeed ;
+  // else if (pidLeft < minSpeed)
+  //   pidLeft = minSpeed;
 
-  if (pidRight < minSpeed + COMPENSATION_PWM)
-    pidRight = minSpeed + COMPENSATION_PWM;
-  else if (pidRight > maxSpeed)
-    pidRight = maxSpeed;
+  // if (pidRight < minSpeed + COMPENSATION_PWM)
+  //   pidRight = minSpeed + COMPENSATION_PWM;
+  // else if (pidRight > maxSpeed)
+  //   pidRight = maxSpeed;
 
-  if (pidLeft <= minSpeed)
-  {
-    motorLeft->GoBack(pidLeft + 40 );
-    motorRight->GoAvance(pidRight);
-  }
-  else if (pidRight <= minSpeed)
-  {
-    motorLeft->GoAvance(pidLeft);
-    motorRight->GoBack(pidRight + 30);
-  }
-  else
-  {
-    motorLeft->GoAvance(pidLeft);
-    motorRight->GoAvance(pidRight);
-  }
-
+  // if (pidLeft <= minSpeed)
+  // {
+  //   motorLeft->GoBack(pidLeft + 40 );
+  //   motorRight->GoAvance(pidRight);
+  // }
+  // else if (pidRight <= minSpeed)
+  // {
+  //   motorLeft->GoAvance(pidLeft);
+  //   motorRight->GoBack(pidRight + 30);
+  // }
+  // else
+  // {
+  //   motorLeft->GoAvance(pidLeft);
+  //   motorRight->GoAvance(pidRight);
+  // }
 }
 
 // funcion que imprime un menu por bluetooth
@@ -174,13 +187,13 @@ void printOptions()
   SerialBT.println("Configuracion Actual:");
 
   SerialBT.print("- KP = ");
-  SerialBT.println(kp,5);
+  SerialBT.println(kp, 5);
 
   SerialBT.print("- KI = ");
-  SerialBT.println(ki,5);
+  SerialBT.println(ki, 5);
 
   SerialBT.print("- KD = ");
-  SerialBT.println(kd,5);
+  SerialBT.println(kd, 5);
 
   SerialBT.print("- maxSpeed = ");
   SerialBT.println(maxSpeed);
@@ -428,7 +441,8 @@ void loop()
   {
     PID();
   }
-  else {
+  else
+  {
     motorLeft->Still();
     motorRight->Still();
   }
