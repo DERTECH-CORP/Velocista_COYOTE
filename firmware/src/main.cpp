@@ -43,9 +43,9 @@ int integral = 0;
 int lastErr = 0;
 
 // variables configurables para el pid
-float kp = 0.16700;
+float kp = 0.09700;
 float ki = 0;
-float kd = 0.15000;
+float kd = 0.37000;
 
 float speed = 0;
 
