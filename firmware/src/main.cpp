@@ -51,7 +51,7 @@ float speed = 0;
 
 // velocidad crucero es la velocidad que se
 // utiliza para el pid y es el pico en rectas
-int velocity = 220;
+int velocity = 240;
 
 int velocityTurn = 110;
 
@@ -104,7 +104,7 @@ void calibration()
   delay(500);
   pinMode(Led, OUTPUT);
   digitalWrite(Led, HIGH);
-  for (uint16_t i = 0; i < 500; i++)
+  for (uint16_t i = 0; i < 250; i++)
   {
     qtr.calibrate();
   }
@@ -230,6 +230,10 @@ void printOptions()
 
 void menuBT()
 {
+  if (!SerialBT.available()){
+    return;
+  }
+
   if (SerialBT.available())
   {
     char Menssage = SerialBT.read();
@@ -433,7 +437,7 @@ void loop()
 
   menuBT();
 
-  // SerialBT.println(getPosition());
+  SerialBT.println(getPosition());
 
   if (run)
   {
