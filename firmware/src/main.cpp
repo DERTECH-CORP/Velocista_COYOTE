@@ -35,7 +35,7 @@ bool run = false;
 #define VALUE_0_1 0.1
 #define VALUE_0_01 0.01
 
-#define COMPENSATION_PWM 5
+#define COMPENSATION_PWM 0
 
 int proportional = 0;
 int derivative = 0;
@@ -43,15 +43,15 @@ int integral = 0;
 int lastErr = 0;
 
 // variables configurables para el pid
-float kp = 0.06700;
+float kp = 0.08700;
 float ki = 0;
-float kd = 0.15000;
+float kd = 0.4000;
 
 float speed = 0;
 
 // velocidad crucero es la velocidad que se
 // utiliza para el pid y es el pico en rectas
-int velocity = 200;
+int velocity = 240;
 
 int velocityTurn = 110;
 
@@ -60,10 +60,12 @@ int velocityTurn = 110;
 float pidLeft = 0;
 float pidRight = 0;
 
+float pidMax = 0;
+
 // estos son los valores maximos y minimos
 // de los motores cuando se le aplica el pid
 int maxSpeed = 250;
-int minSpeed = 90;
+int minSpeed = 130;
 
 // gete es la barrera que sirve como flag
 // para las condicionales de giro
@@ -117,30 +119,6 @@ int getPosition()
   return position;
 }
 
-void motores(int vel1, int vel2)
-{
-  // motorLeft->GoAvance(vel1);
-  // motorRight->GoAvance(vel2);
-
-  SerialBT.println(vel1);
-  SerialBT.println(vel2);
-}
-
-int frenoW = 230;
-int frenoS = 100;
-
-void frenos(){
-  if(getPosition() < 1000){
-    // motorLeft->GoBack(frenoS);
-    // motorRight->GoAvance(frenoW);
-    SerialBT.println("doblar a la izq frenos");
-  }else if (getPosition() > 6000){
-    // motorLeft->GoAvance(frenoW);
-    // motorRight->GoBack(frenoS);
-    SerialBT.println("doblar a la derecha frenos");
-  }
-}
-
 void PID()
 {
   int position = getPosition();
@@ -155,39 +133,38 @@ void PID()
 
   lastErr = proportional;
 
-  if (speed > velocity)
-    speed = velocity;
-  else if (speed < -velocity)
-    speed = -velocity;
-  (speed < 0) ? motores(velocity, velocity + speed) : motores(velocity - speed, velocity);
-  // pidLeft = (velocity + speed);
-  // pidRight = (velocity - speed);
+  pidLeft = (velocity + speed);
+  pidRight = (velocity - speed);
 
-  // if (pidLeft > maxSpeed )
-  //   pidLeft = maxSpeed ;
-  // else if (pidLeft < minSpeed)
-  //   pidLeft = minSpeed;
+  if (pidLeft > maxSpeed )
+    pidLeft = maxSpeed ;
+  else if (pidLeft < minSpeed)
+    pidLeft = minSpeed;
 
-  // if (pidRight < minSpeed + COMPENSATION_PWM)
-  //   pidRight = minSpeed + COMPENSATION_PWM;
-  // else if (pidRight > maxSpeed)
-  //   pidRight = maxSpeed;
+  if (pidRight < minSpeed + COMPENSATION_PWM)
+    pidRight = minSpeed + COMPENSATION_PWM;
+  else if (pidRight > maxSpeed)
+    pidRight = maxSpeed;
 
-  // if (pidLeft <= minSpeed)
-  // {
-  //   motorLeft->GoBack(pidLeft + 40 );
-  //   motorRight->GoAvance(pidRight);
-  // }
-  // else if (pidRight <= minSpeed)
-  // {
-  //   motorLeft->GoAvance(pidLeft);
-  //   motorRight->GoBack(pidRight + 30);
-  // }
-  // else
-  // {
-  //   motorLeft->GoAvance(pidLeft);
-  //   motorRight->GoAvance(pidRight);
-  // }
+  if (pidLeft <= minSpeed)
+  {
+    motorLeft->GoBack(pidLeft + 50 );
+    motorRight->GoAvance(pidRight);
+  }
+  else if (pidRight <= minSpeed)
+  {
+    motorLeft->GoAvance(pidLeft);
+    motorRight->GoBack(pidRight + 40);
+  }
+  else
+  {
+    motorLeft->GoAvance(pidLeft);
+    motorRight->GoAvance(pidRight);
+    if(speed > pidMax){
+        pidMax = speed;
+    }
+  }
+
 }
 
 // funcion que imprime un menu por bluetooth
@@ -202,13 +179,13 @@ void printOptions()
   SerialBT.println("Configuracion Actual:");
 
   SerialBT.print("- KP = ");
-  SerialBT.println(kp, 5);
+  SerialBT.println(kp,5);
 
   SerialBT.print("- KI = ");
-  SerialBT.println(ki, 5);
+  SerialBT.println(ki,5);
 
   SerialBT.print("- KD = ");
-  SerialBT.println(kd, 5);
+  SerialBT.println(kd,5);
 
   SerialBT.print("- maxSpeed = ");
   SerialBT.println(maxSpeed);
@@ -248,10 +225,15 @@ void printOptions()
   SerialBT.println(" (+) velocityTurn + 1 / (-) velocityTurn - 1");
 
   SerialBT.println(" (F) para ver la posicion");
+  SerialBT.println(" (E) para ver la el pid maximo");
 }
 
 void menuBT()
 {
+  if (!SerialBT.available()){
+    return;
+  }
+
   if (SerialBT.available())
   {
     char Menssage = SerialBT.read();
@@ -350,6 +332,11 @@ void menuBT()
     {
       SerialBT.println(getPosition());
       break;
+    }
+    case 'E':
+    {
+      SerialBT.print("Pid maximo: ");
+      SerialBT.println(pidMax);
     }
     case '1':
     {
@@ -450,15 +437,13 @@ void loop()
 
   menuBT();
 
-  // SerialBT.println(getPosition());
+  SerialBT.println(getPosition());
 
   if (run)
   {
-    frenos();
     PID();
   }
-  else
-  {
+  else {
     motorLeft->Still();
     motorRight->Still();
   }
