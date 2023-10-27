@@ -43,15 +43,15 @@ int integral = 0;
 int lastErr = 0;
 
 // variables configurables para el pid
-float kp = 0.09700;
+float kp = 0.08700;
 float ki = 0;
-float kd = 0.37000;
+float kd = 0.4000;
 
 float speed = 0;
 
 // velocidad crucero es la velocidad que se
 // utiliza para el pid y es el pico en rectas
-int velocity = 200;
+int velocity = 220;
 
 int velocityTurn = 110;
 
@@ -60,10 +60,12 @@ int velocityTurn = 110;
 float pidLeft = 0;
 float pidRight = 0;
 
+float pidMax = 0;
+
 // estos son los valores maximos y minimos
 // de los motores cuando se le aplica el pid
 int maxSpeed = 250;
-int minSpeed = 90;
+int minSpeed = 130;
 
 // gete es la barrera que sirve como flag
 // para las condicionales de giro
@@ -158,6 +160,9 @@ void PID()
   {
     motorLeft->GoAvance(pidLeft);
     motorRight->GoAvance(pidRight);
+    if(speed > pidMax){
+        pidMax = speed;
+    }
   }
 
 }
@@ -220,6 +225,7 @@ void printOptions()
   SerialBT.println(" (+) velocityTurn + 1 / (-) velocityTurn - 1");
 
   SerialBT.println(" (F) para ver la posicion");
+  SerialBT.println(" (E) para ver la el pid maximo");
 }
 
 void menuBT()
@@ -322,6 +328,11 @@ void menuBT()
     {
       SerialBT.println(getPosition());
       break;
+    }
+    case 'E':
+    {
+      SerialBT.print("Pid maximo: ");
+      SerialBT.println(pidMax);
     }
     case '1':
     {
