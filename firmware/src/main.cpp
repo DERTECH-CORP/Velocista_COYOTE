@@ -51,7 +51,7 @@ float speed = 0;
 
 // velocidad crucero es la velocidad que se
 // utiliza para el pid y es el pico en rectas
-int velocity = 190;
+int velocity = 180;
 
 int velocityTurn = 110;
 
@@ -64,8 +64,8 @@ float pidMax = 0;
 
 // estos son los valores maximos y minimos
 // de los motores cuando se le aplica el pid
-int maxSpeed = 247;
-int minSpeed = 145;
+int maxSpeed = 245;
+int minSpeed = 150;
 
 // gete es la barrera que sirve como flag
 // para las condicionales de giro
