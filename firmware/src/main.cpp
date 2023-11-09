@@ -51,7 +51,7 @@ float speed = 0;
 
 // velocidad crucero es la velocidad que se
 // utiliza para el pid y es el pico en rectas
-int velocity = 255;
+int velocity = 200;
 
 int velocityTurn = 110;
 
@@ -81,7 +81,7 @@ BluetoothSerial SerialBT;
 
 QTRSensors qtr;
 
-MOTOR *motorLeft = new MOTOR(M1B, M1A, M1B_CHANEL, M1A_CHANEL);
+MOTOR *motorLeft = new MOTOR(M1A, M1B, M1B_CHANEL, M1A_CHANEL);
 
 MOTOR *motorRight = new MOTOR(M2A, M2B, M2B_CHANEL, M2A_CHANEL);
 
@@ -115,7 +115,7 @@ void calibration()
 //  de la linea
 int getPosition()
 {
-  int position = qtr.readLineWhite(sensorValues);
+  int position = qtr.readLineBlack(sensorValues);
   return position;
 }
 
@@ -415,7 +415,7 @@ void menuBT()
 
 void setup()
 {
-  SerialBT.begin("coyote");
+  SerialBT.begin("anciano");
   pinMode(Led, OUTPUT);
   calibration();
   pinMode(LedB, OUTPUT);
@@ -431,11 +431,11 @@ void loop()
   if (digitalRead(BUTTON) == LOW)
     isPress = true;
 
-  // menuBT();
+  menuBT();
 
   // // SerialBT.println(getPosition());
 
-  if (isPress)
+  if (run)
   {
     PID();
   }
