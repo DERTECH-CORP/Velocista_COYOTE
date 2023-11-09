@@ -45,13 +45,13 @@ int lastErr = 0;
 // variables configurables para el pid
 float kp = 0.08700;
 float ki = 0;
-float kd = 0.8000;
+float kd = 0.4000;
 
 float speed = 0;
 
 // velocidad crucero es la velocidad que se
 // utiliza para el pid y es el pico en rectas
-int velocity = 250;
+int velocity = 255;
 
 int velocityTurn = 110;
 
@@ -115,7 +115,7 @@ void calibration()
 //  de la linea
 int getPosition()
 {
-  int position = qtr.readLineBlack(sensorValues);
+  int position = qtr.readLineWhite(sensorValues);
   return position;
 }
 
@@ -148,7 +148,7 @@ void PID()
 
   if (pidLeft <= minSpeed)
   {
-    motorLeft->GoBack(pidLeft + 90 );
+    motorLeft->GoBack(pidLeft + 50 );
     motorRight->GoAvance(pidRight);
   }
   else if (pidRight <= minSpeed)
@@ -431,11 +431,11 @@ void loop()
   if (digitalRead(BUTTON) == LOW)
     isPress = true;
 
-  menuBT();
+  // menuBT();
 
   // // SerialBT.println(getPosition());
 
-  if (run)
+  if (isPress)
   {
     PID();
   }
