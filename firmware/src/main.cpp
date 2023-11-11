@@ -53,7 +53,7 @@ float speed = 0;
 // utiliza para el pid y es el pico en rectas
 int velocity = 255;
 
-int velocityTurn = 110;
+int velocityTurn = 130;
 
 // floats para almacenar los valores de los pid
 // de cada motor
