@@ -43,9 +43,9 @@ int integral = 0;
 int lastErr = 0;
 
 // variables configurables para el pid
-float kp = 0.08700;
+float kp = 0.06;
 float ki = 0;
-float kd = 0.4000;
+float kd = 0.3500;
 
 float speed = 0;
 
@@ -53,7 +53,7 @@ float speed = 0;
 // utiliza para el pid y es el pico en rectas
 int velocity = 180;
 
-int velocityTurn = 110;
+int velocityTurn = 30;
 
 // floats para almacenar los valores de los pid
 // de cada motor
@@ -65,7 +65,7 @@ float pidMax = 0;
 // estos son los valores maximos y minimos
 // de los motores cuando se le aplica el pid
 int maxSpeed = 245;
-int minSpeed = 150;
+int minSpeed = 125;
 
 // gete es la barrera que sirve como flag
 // para las condicionales de giro
