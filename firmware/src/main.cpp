@@ -51,7 +51,7 @@ float speed = 0;
 
 // velocidad crucero es la velocidad que se
 // utiliza para el pid y es el pico en rectas
-int velocity = 180;
+int velocity = 240;
 
 int velocityTurn = 30;
 
@@ -65,7 +65,7 @@ float pidMax = 0;
 // estos son los valores maximos y minimos
 // de los motores cuando se le aplica el pid
 int maxSpeed = 245;
-int minSpeed = 125;
+int minSpeed = 200;
 
 // gete es la barrera que sirve como flag
 // para las condicionales de giro
@@ -148,21 +148,18 @@ void PID()
 
   if (pidLeft <= minSpeed)
   {
-    motorLeft->GoBack(pidLeft + 50 );
+    motorLeft->GoBack(pidLeft + 55 );
     motorRight->GoAvance(pidRight);
   }
   else if (pidRight <= minSpeed)
   {
     motorLeft->GoAvance(pidLeft);
-    motorRight->GoBack(pidRight + 40);
+    motorRight->GoBack(pidRight + 50);
   }
   else
   {
     motorLeft->GoAvance(pidLeft);
     motorRight->GoAvance(pidRight);
-    // if(speed > pidMax){
-    //     pidMax = speed;
-    // }
   }
 
 }
@@ -415,7 +412,7 @@ void PID()
 
 void setup()
 {
-  // SerialBT.begin("coyote");
+   SerialBT.begin("coyote");
   pinMode(Led, OUTPUT);
   calibration();
   pinMode(LedB, OUTPUT);
