@@ -2,9 +2,9 @@
 #include <QTRSensors.h>
 #include <Motor.h>
 
-// #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
-// #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
-// #endif
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
+#endif
 
 // boleano para que se ejecute el pid
 bool run = false;
@@ -53,7 +53,7 @@ float speed = 0;
 // utiliza para el pid y es el pico en rectas
 int velocity = 255;
 
-int velocityTurn = 110;
+int velocityTurn = 130;
 
 // floats para almacenar los valores de los pid
 // de cada motor
@@ -168,254 +168,254 @@ void PID()
 }
 
 // funcion que imprime un menu por bluetooth
-// void printOptions()
-// {
-//   // clean the serial
-//   for (int i = 0; i < 10; i++)
-//   {
-//     SerialBT.println("");
-//   }
+void printOptions()
+{
+  // clean the serial
+  for (int i = 0; i < 10; i++)
+  {
+    SerialBT.println("");
+  }
 
-//   SerialBT.println("Configuracion Actual:");
+  SerialBT.println("Configuracion Actual:");
 
-//   SerialBT.print("- KP = ");
-//   SerialBT.println(kp,5);
+  SerialBT.print("- KP = ");
+  SerialBT.println(kp,5);
 
-//   SerialBT.print("- KI = ");
-//   SerialBT.println(ki,5);
+  SerialBT.print("- KI = ");
+  SerialBT.println(ki,5);
 
-//   SerialBT.print("- KD = ");
-//   SerialBT.println(kd,5);
+  SerialBT.print("- KD = ");
+  SerialBT.println(kd,5);
 
-//   SerialBT.print("- maxSpeed = ");
-//   SerialBT.println(maxSpeed);
+  SerialBT.print("- maxSpeed = ");
+  SerialBT.println(maxSpeed);
 
-//   SerialBT.print("- lockLeft = ");
-//   SerialBT.println(lockLeft);
+  SerialBT.print("- lockLeft = ");
+  SerialBT.println(lockLeft);
 
-//   SerialBT.print("- lockRight = ");
-//   SerialBT.println(lockRight);
+  SerialBT.print("- lockRight = ");
+  SerialBT.println(lockRight);
 
-//   SerialBT.print("- gateLeft = ");
-//   SerialBT.println(gateLeft);
+  SerialBT.print("- gateLeft = ");
+  SerialBT.println(gateLeft);
 
-//   SerialBT.print("- gateRight = ");
-//   SerialBT.println(gateRight);
+  SerialBT.print("- gateRight = ");
+  SerialBT.println(gateRight);
 
-//   SerialBT.print("- velocityTurn = ");
-//   SerialBT.println(velocityTurn);
+  SerialBT.print("- velocityTurn = ");
+  SerialBT.println(velocityTurn);
 
-//   SerialBT.println(" (K) KP + 0.1 / (L) KP - 0.1");
-//   SerialBT.println(" (Q) KP + 0.01 / (W) KP - 0.01");
+  SerialBT.println(" (K) KP + 0.1 / (L) KP - 0.1");
+  SerialBT.println(" (Q) KP + 0.01 / (W) KP - 0.01");
 
-//   SerialBT.println(" (R) KI + 0.1 / (T) KI - 0.1");
-//   SerialBT.println(" (U) KI + 0.01 / (I) KI - 00.1");
+  SerialBT.println(" (R) KI + 0.1 / (T) KI - 0.1");
+  SerialBT.println(" (U) KI + 0.01 / (I) KI - 00.1");
 
-//   SerialBT.println(" (Z) KD + 0.1 / (X) KD - 0.1");
-//   SerialBT.println(" (G) KD + 0.01 / (H) KD - 00.1");
+  SerialBT.println(" (Z) KD + 0.1 / (X) KD - 0.1");
+  SerialBT.println(" (G) KD + 0.01 / (H) KD - 00.1");
 
-//   SerialBT.println(" (1) lockLeft + 5 / (2) lockLeft - 5");
-//   SerialBT.println(" (3) lockRight + 5 / (4) lockRight - 5");
+  SerialBT.println(" (1) lockLeft + 5 / (2) lockLeft - 5");
+  SerialBT.println(" (3) lockRight + 5 / (4) lockRight - 5");
 
-//   SerialBT.println(" (5) maxSpeed + 5 / (6) maxSpeed - 5");
+  SerialBT.println(" (5) maxSpeed + 5 / (6) maxSpeed - 5");
 
-//   SerialBT.println(" (7) gateLeft + 500 / (8) gateLeft - 500");
-//   SerialBT.println(" (9) gateRight + 500 / (0) gateRight - 500");
+  SerialBT.println(" (7) gateLeft + 500 / (8) gateLeft - 500");
+  SerialBT.println(" (9) gateRight + 500 / (0) gateRight - 500");
 
-//   SerialBT.println(" (+) velocityTurn + 1 / (-) velocityTurn - 1");
+  SerialBT.println(" (+) velocityTurn + 1 / (-) velocityTurn - 1");
 
-//   SerialBT.println(" (F) para ver la posicion");
-//   SerialBT.println(" (E) para ver la el pid maximo");
-// }
+  SerialBT.println(" (F) para ver la posicion");
+  SerialBT.println(" (E) para ver la el pid maximo");
+}
 
-// void menuBT()
-// {
-//   if (SerialBT.available())
-//   {
-//     char Menssage = SerialBT.read();
-//     switch (Menssage)
-//     {
-//     case 'M':
-//     {
-//       printOptions();
-//       break;
-//     }
-//     case 'A':
-//     {
-//       run = true;
-//       break;
-//     }
-//     case 'B':
-//     {
-//       run = false;
-//       break;
-//     }
-//     case 'K':
-//     {
-//       kp += VALUE_0_1;
-//       printOptions();
-//       break;
-//     }
-//     case 'L':
-//     {
-//       kp -= VALUE_0_1;
-//       printOptions();
-//       break;
-//     }
-//     case 'Q':
-//     {
-//       kp += VALUE_0_01;
-//       printOptions();
-//       break;
-//     }
-//     case 'W':
-//     {
-//       kp -= VALUE_0_01;
-//       printOptions();
-//       break;
-//     }
+void menuBT()
+{
+  if (SerialBT.available())
+  {
+    char Menssage = SerialBT.read();
+    switch (Menssage)
+    {
+    case 'M':
+    {
+      printOptions();
+      break;
+    }
+    case 'A':
+    {
+      run = true;
+      break;
+    }
+    case 'B':
+    {
+      run = false;
+      break;
+    }
+    case 'K':
+    {
+      kp += VALUE_0_1;
+      printOptions();
+      break;
+    }
+    case 'L':
+    {
+      kp -= VALUE_0_1;
+      printOptions();
+      break;
+    }
+    case 'Q':
+    {
+      kp += VALUE_0_01;
+      printOptions();
+      break;
+    }
+    case 'W':
+    {
+      kp -= VALUE_0_01;
+      printOptions();
+      break;
+    }
 
-//     case 'R':
-//     {
-//       ki += VALUE_0_1;
-//       printOptions();
-//       break;
-//     }
-//     case 'T':
-//     {
-//       ki -= VALUE_0_1;
-//       printOptions();
-//       break;
-//     }
-//     case 'U':
-//     {
-//       ki += VALUE_0_01;
-//       printOptions();
-//       break;
-//     }
-//     case 'I':
-//     {
-//       ki -= VALUE_0_01;
-//       printOptions();
-//       break;
-//     }
+    case 'R':
+    {
+      ki += VALUE_0_1;
+      printOptions();
+      break;
+    }
+    case 'T':
+    {
+      ki -= VALUE_0_1;
+      printOptions();
+      break;
+    }
+    case 'U':
+    {
+      ki += VALUE_0_01;
+      printOptions();
+      break;
+    }
+    case 'I':
+    {
+      ki -= VALUE_0_01;
+      printOptions();
+      break;
+    }
 
-//     case 'Z':
-//     {
-//       kd += VALUE_0_1;
-//       printOptions();
-//       break;
-//     }
-//     case 'X':
-//     {
-//       kd -= VALUE_0_1;
-//       printOptions();
-//       break;
-//     }
-//     case 'G':
-//     {
-//       kd += VALUE_0_01;
-//       printOptions();
-//       break;
-//     }
-//     case 'H':
-//     {
-//       kd -= VALUE_0_01;
-//       printOptions();
-//       break;
-//     }
-//     case 'F':
-//     {
-//       SerialBT.println(getPosition());
-//       break;
-//     }
-//     case 'E':
-//     {
-//       SerialBT.print("Pid maximo: ");
-//       SerialBT.println(pidMax);
-//     }
-//     case '1':
-//     {
-//       lockLeft += VALUE_5;
-//       printOptions();
-//       break;
-//     }
-//     case '2':
-//     {
-//       lockLeft -= VALUE_5;
-//       printOptions();
-//       break;
-//     }
-//     case '3':
-//     {
-//       lockRight += VALUE_5;
-//       printOptions();
-//       break;
-//     }
-//     case '4':
-//     {
-//       lockRight -= VALUE_5;
-//       printOptions();
-//       break;
-//     }
-//     case '5':
-//     {
-//       maxSpeed += VALUE_5;
-//       printOptions();
-//       break;
-//     }
-//     case '6':
-//     {
-//       maxSpeed -= VALUE_5;
-//       printOptions();
-//       break;
-//     }
-//     case '7':
-//     {
-//       gateLeft += VALUE_500;
-//       printOptions();
-//       break;
-//     }
-//     case '8':
-//     {
-//       gateLeft -= VALUE_500;
-//       printOptions();
-//       break;
-//     }
-//     case '9':
-//     {
-//       gateRight += VALUE_500;
-//       printOptions();
-//       break;
-//     }
-//     case '0':
-//     {
-//       gateRight -= VALUE_500;
-//       printOptions();
-//       break;
-//     }
-//     case '+':
-//     {
-//       velocityTurn += 1;
-//       printOptions();
-//       break;
-//     }
-//     case '-':
-//     {
-//       velocityTurn -= 1;
-//       printOptions();
-//       break;
-//     }
+    case 'Z':
+    {
+      kd += VALUE_0_1;
+      printOptions();
+      break;
+    }
+    case 'X':
+    {
+      kd -= VALUE_0_1;
+      printOptions();
+      break;
+    }
+    case 'G':
+    {
+      kd += VALUE_0_01;
+      printOptions();
+      break;
+    }
+    case 'H':
+    {
+      kd -= VALUE_0_01;
+      printOptions();
+      break;
+    }
+    case 'F':
+    {
+      SerialBT.println(getPosition());
+      break;
+    }
+    case 'E':
+    {
+      SerialBT.print("Pid maximo: ");
+      SerialBT.println(pidMax);
+    }
+    case '1':
+    {
+      lockLeft += VALUE_5;
+      printOptions();
+      break;
+    }
+    case '2':
+    {
+      lockLeft -= VALUE_5;
+      printOptions();
+      break;
+    }
+    case '3':
+    {
+      lockRight += VALUE_5;
+      printOptions();
+      break;
+    }
+    case '4':
+    {
+      lockRight -= VALUE_5;
+      printOptions();
+      break;
+    }
+    case '5':
+    {
+      maxSpeed += VALUE_5;
+      printOptions();
+      break;
+    }
+    case '6':
+    {
+      maxSpeed -= VALUE_5;
+      printOptions();
+      break;
+    }
+    case '7':
+    {
+      gateLeft += VALUE_500;
+      printOptions();
+      break;
+    }
+    case '8':
+    {
+      gateLeft -= VALUE_500;
+      printOptions();
+      break;
+    }
+    case '9':
+    {
+      gateRight += VALUE_500;
+      printOptions();
+      break;
+    }
+    case '0':
+    {
+      gateRight -= VALUE_500;
+      printOptions();
+      break;
+    }
+    case '+':
+    {
+      velocityTurn += 1;
+      printOptions();
+      break;
+    }
+    case '-':
+    {
+      velocityTurn -= 1;
+      printOptions();
+      break;
+    }
 
-//     default:
-//       break;
-//     }
-//   }
-// }
+    default:
+      break;
+    }
+  }
+}
 
 void setup()
 {
-  // SerialBT.begin("coyote");
+  SerialBT.begin("coyote");
   pinMode(Led, OUTPUT);
   calibration();
   pinMode(LedB, OUTPUT);
